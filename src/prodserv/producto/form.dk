@@ -1,0 +1,491 @@
+#include "dkli.dkh"
+#!
+module "form.dk"
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "dbr.dkh"
+    #include "uielements.dkl"
+    #include "../config.dk"
+    #include "lib.dk"
+    #include "uielements.v12.dkl"
+
+    do @context.begin(@crud_context)
+
+    ref producto = ifnull(@("&./producto"), record.create())
+    ref tipoprod = @("&./tipoprod")
+    ref metodval = @("&./metodval")
+    ref impuesto = @("&./impuesto")
+    ref clasprod = @("&./clasprod")
+    ref tipocomi = @("&./tipocomi")
+    ref formcomi = @("&./formcomi")
+
+    ref database = @("&database")
+
+    entityId = @("$parameters/_entity_id")
+    errorMsg = @("$error/message")
+    isNewEnt = (entityId == "_new")
+    formActn = replace(@PRODSERV_ADD_EDIT_PRODUCTO, "@id", entityId)
+
+    ref divsa = lib.get_divisa(database, field.dnum(producto,"idivisa",1))
+    ref linea = lib.get_linea(database, @@(producto,"$ilinea"))
+    ref depar = lib.get_departamento(database, @@(producto,"$idepartamento"))
+    ref marca = lib.get_marca(database, @@(producto,"$imarca"))
+    ref prov1 = lib.get_proveedor(database, @@(producto,"$proveedor1"))
+    ref prov2 = lib.get_proveedor(database, @@(producto,"$proveedor2"))
+    ref prov3 = lib.get_proveedor(database, @@(producto,"$proveedor3"))
+
+    header_act::
+    { 
+        #$
+        button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" id="btn_submit"){ $'#<@@(@icons,"save")>' }
+    }
+
+    #! point general_act to header_act
+
+    new nav_config
+    {
+        @"title": ifstr(isNewEnt,'Agregar','Editar') + ' producto o servicio'
+        @"buttons*": general_act
+        @"urlexit": @PRODSERV_PRODUCTO
+        member @"hidden"
+        {
+            @"print": @true
+        }
+    }
+
+    #$ div(class="container")
+    {
+        form(method="POST" action="#<formActn>" id="form")
+        {
+            #! #! do uie.printV12FormBar(nav_config)
+
+            #$ div(id="work_area" class="container-section")
+            {
+                div(class="#<ifstr(@('error/message')!='','alert alert-danger','')>"){$"#<@('error/message')>"}
+
+                #$
+                input(type="hidden" name="sys_pk" value="#<@@(producto, '#sys_pk')>")
+                input(type="hidden" name="sys_recver" value="#<@@(producto, '#sys_recver')>")
+                // input(type="hidden" name="iclase" value="#<field.dnum(producto,'iclase',1)>")
+
+                // NAV TABS
+                ul(class="nav nav-tabs mt-3" id="myTab" role="tablist")
+                {
+                    li(class="nav-item" role="presentation") {
+                        button(class="nav-link active" id="general-tab" "data-bs-toggle"="tab" "data-bs-target"="#general" type="button" role="tab" "aria-controls"="general" "aria-selected"="true"){$"General"}
+                    }
+                    li(class="nav-item" role="presentation") {
+                        button(class="nav-link" id="control-tab" "data-bs-toggle"="tab" "data-bs-target"="#control" type="button" role="tab" "aria-controls"="control" "aria-selected"="false"){$"Precio y control"}
+                    }
+                    li(class="nav-item" role="presentation") {
+                        button(class="nav-link" id="inventario-tab" "data-bs-toggle"="tab" "data-bs-target"="#inventario" type="button" role="tab" "aria-controls"="inventario" "aria-selected"="false"){$"Inventario y suministro"}
+                    }
+                    li(class="nav-item" role="presentation") {
+                        button(class="nav-link" id="notes-tab" "data-bs-toggle"="tab" "data-bs-target"="#notes" type="button" role="tab" "aria-controls"="notes" "aria-selected"="false"){$"Notas"}
+                    }
+                    li(class="nav-item" role="presentation") {
+                        button(class="nav-link" id="sat-tab" "data-bs-toggle"="tab" "data-bs-target"="#sat" type="button" role="tab" "aria-controls"="sat" "aria-selected"="false"){$"SAT"}
+                    }
+                }
+
+                // PANEL TABS
+                div(class="tab-content" id="tabContent")
+                {
+                    // PANEL GENERAL
+                    div(class="tab-pane fade show active" id="general" role="tabpanel" "aria-labelledby"="general-tab")
+                    {
+                        div(class="border-bottom py-4")
+                        {
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-3")
+                                {
+                                    small(class="fw-bold"){$"Código:"}
+                                    input(type="text" class="induxsoft-form-control" name="codigo" value="#<@@(producto,'$codigo')>" required="true" maxlength="35")
+                                }
+                                div(class="col-sm-9")
+                                {
+                                    small(class="fw-bold"){$"Descripción:"}
+                                    input(type="text" class="induxsoft-form-control" name="descripcion" value="#<@@(producto,'$descripcion')>" required="true" maxlength="150")
+                                }
+                            }
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-6")
+                                {
+                                    small(class="fw-bold"){$"Línea:"}
+                                    "input-key"(id="ik_linea" name="ilinea" "data-value"='#<to.json(linea)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion" "data-source"="#<@PRODSERV_SEARCH_LINEA>" columns="codigo,descripcion" colcaptions="Código,Descripción" "box-title-text"="Seleccione una línea" "box-placeholder-text"="Buscar línea" "box-nodata-text"="No se encontraron líneas" required="true" "control-styles"="#search_container{padding-left: 0 !important;}"){$""}
+                                }
+                                div(class="col-sm-6")
+                                {
+                                    small{$"Marca:"}
+                                    "input-key"(id="ik_marca" name="imarca" "data-value"='#<to.json(marca)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion" "data-source"="#<@PRODSERV_SEARCH_MARCA>" columns="codigo,descripcion" colcaptions="Código,Descripción" "box-title-text"="Seleccione una marca" "box-placeholder-text"="Buscar marca" "box-nodata-text"="No se encontraron marcas"){$""}
+                                }
+                            }
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-6")
+                                {
+                                    small(class="fw-bold"){$"Moneda:"}
+                                    "input-key"(id="ik_divisa" name="idivisa" "data-value"='#<to.json(divsa)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion" "data-source"="#<@PRODSERV_SEARCH_DIVISA>" columns="codigo,descripcion" colcaptions="Código,Descripción" "box-title-text"="Seleccione una moneda" "box-placeholder-text"="Buscar moneda" "box-nodata-text"="No se encontraron monedas" required="true" "control-styles"="#search_container{padding-left: 0 !important;}"){$""}
+                                }
+                                div(class="col-sm-6")
+                                {
+                                    small{$"Departamento:"}
+                                    "input-key"(id="ik_departamento" name="idepartamento" "data-value"='#<to.json(depar)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="descripcion" "data-source"="#<@PRODSERV_SEARCH_DEPARTAMENTO>" columns="codigo,descripcion" colcaptions="Código,Descripción" "box-title-text"="Seleccione un departamento" "box-placeholder-text"="Buscar departamento" "box-nodata-text"="No se encontraron departamentos"){$""}
+                                }
+                            }
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-3")
+                                {
+                                    small(class="fw-bold"){$"Clase:"}
+                                    #! do uie.dbSelect(lib.def_clases_producto(clasprod, @@(producto,'iclase')))
+                                }
+                                #$ div(class="col-sm-3")
+                                {
+                                    small(class="fw-bold"){$"Tipo:"}
+                                    #! do uie.dbSelect(lib.def_tipos_producto(tipoprod, @@(producto,'itipo')))
+                                }
+                            }
+                        }
+                        #$ div(class="border-bottom py-4 row")
+                        {
+                            h6{$"Códigos alternos"}
+                            div(class="col-sm-4")
+                            {
+                                small{$"Código de barras 1:"}
+                                input(type="text" class="induxsoft-form-control mb-2" name="codbar1" value="#<@@(producto,'$codbar1')>" maxlength="35")
+                            }
+                            div(class="col-sm-4")
+                            {
+                                small{$"Código de barras 2:"}
+                                input(type="text" class="induxsoft-form-control mb-2" name="codbar2" value="#<@@(producto,'$codbar2')>" maxlength="35")
+                            }
+                            div(class="col-sm-4")
+                            {
+                                small{$"Código de barras 3:"}
+                                input(type="text" class="induxsoft-form-control mb-2" name="codbar3" value="#<@@(producto,'$codbar3')>" maxlength="35")
+                            }
+                        }
+                        div(class="border-bottom py-4 row")
+                        {
+                            div(class="col-sm-6")
+                            {
+                                div(class="d-flex gap-2 align-items-center mb-2")
+                                {
+                                    div
+                                    {
+                                        small(class="fw-bold"){$"Unidad estandar:"}
+                                        div(class="d-flex gap-2 align-items-center")
+                                        {
+                                            input(type="text" class="induxsoft-form-control" name="unidad" value="#<field.dstr(producto,'unidad','PZA')>" required="true" maxlength="10")
+                                            p(class="m-0"){$"x"}
+                                        }
+                                    }
+                                    div
+                                    {
+                                        small{$"Factor:"}
+                                        div(class="d-flex gap-2 align-items-center")
+                                        {
+                                            input(type="number" class="induxsoft-form-control" name="factorb" value="#<field.dnum(producto,'factorb',1)>")
+                                            p(class="m-0"){$"="}
+                                        }
+                                    }
+                                    div
+                                    {
+                                        small{$"Unidad de compra:"}
+                                        input(type="text" class="induxsoft-form-control" name="unidadB" value="#<field.dstr(producto,'unidadB','PZA')>" maxlength="10")
+                                    }
+                                }
+                                div(class="d-flex justify-content-center")
+                                {
+                                    small(id="mesage_factor"){$""}
+                                }
+                            }                           
+                        }
+                        div(class="pt-4 pb-5")
+                        {
+                            div(class="d-flex gap-4")
+                            {
+                                div(class="form-check")
+                                {
+                                    input(class="form-check-input induxsoft-corners" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true")
+                                    label(class="form-check-label" "for"="check_req_ns"){$"Requiere manejar número de serie"}
+                                    input(type="hidden" name="reqserie" id="ipt_reqserie" value="#<@@(producto,'#reqserie')>" required="true")
+                                }
+                                div(class="form-check")
+                                {
+                                    input(class="form-check-input induxsoft-corners" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true")
+                                    label(class="form-check-label" "for"="check_req_lt"){$"Requiere manejar lotes"}
+                                    input(type="hidden" name="reqlote" id="ipt_reqlote" value="#<@@(producto,'#reqlote')>" required="true")
+                                }
+                            }
+                        }
+                    }
+
+                    // PANEL PRECIO Y CONTROL
+                    div(class="tab-pane fade" id="control" role="tabpanel" "aria-labelledby"="control-tab")
+                    {
+                        div(class="border-bottom py-4")
+                        {
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-3")
+                                {
+                                    small(class="fw-bold"){$"Método de valuación:"}
+                                    #! do uie.dbSelect(lib.def_metodo_valuacion(metodval, @@(producto,'metodovaluacion')))
+                                }
+                                #$ div(class="col-sm-3")
+                                {
+                                    small(class="fw-bold"){$"Impuestos:"}
+                                    #! do uie.dbSelect(lib.def_impuestos(impuesto, @@(producto,'impuestos')))
+                                }
+                                #$ div(class="col-sm-3")
+                                {
+                                    small{$"Último costo:"}
+                                    input(type="number" class="induxsoft-form-control mb-2" name="costoultimo" value="#<@@(producto,'#costoultimo')>" step="0.00000001" max="999999999.9999999")
+                                }
+                                div(class="col-sm-3")
+                                {
+                                    small{$"Utilidad mínima:"}
+                                    input(type="number" class="induxsoft-form-control mb-2" name="utilmin" value="#<@@(producto,'#utilmin')>" step="0.00000001" max="999999999.9999999")
+                                }
+                            }
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-4")
+                                {
+                                    small{$"Costo promedio: 0"}
+                                }
+                            }
+                        }
+                        div(class="border-bottom py-4")
+                        {
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-3")
+                                {
+                                    small{$"Tipo de comisión"}
+                                    #! do uie.dbSelect(lib.def_tipo_comision(tipocomi, @@(producto,'tipocomision')))
+                                }
+                                #$ div(class="col-sm-3")
+                                {
+                                    small{$"Forma de comisión"}
+                                    #! do uie.dbSelect(lib.def_forma_comision(formcomi, @@(producto,'formacomision')))
+                                }
+                                #$ div(class="col-sm-3")
+                                {
+                                    small{$"Comisión"}
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision" value="#<@@(producto,'#comision')>" step="0.00000001" max="999999999.9999999")
+                                }
+                                div(class="col-sm-3")
+                                {
+                                    small{$"Precio en puntos"}
+                                    input(type="number" class="induxsoft-form-control mb-2" name="ppuntos" value="#<@@(producto,'#ppuntos')>" step="0.00000001" max="999999999.9999999")
+                                }
+                            }
+                        }
+                        div(class="border-bottom py-4")
+                        {
+                            h6{$"Precios antes de impuestos"}
+                            div(class="row mb-2")
+                            {
+                                div(class="col-4")
+                                {
+                                    input(type="number" class="induxsoft-form-control mb-2" name="precio1" value="#<@@(producto,'#precio1')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="precio2" value="#<@@(producto,'#precio2')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="precio3" value="#<@@(producto,'#precio3')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="precio4" value="#<@@(producto,'#precio4')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="precio5" value="#<@@(producto,'#precio5')>" step="0.00000001" max="999999999.9999999")
+                                }
+                                div(class="col-4 d-flex flex-wrap flex-row pb-2" style="align-content:space-between;")
+                                {
+                                    div(class="w-100 flex-grow-1"){small(class="d-block"){$"P. Máximo"}}
+                                    div{small(class="d-block"){$"P. Mínimo"}}
+                                }
+                            }
+                            div(class="form-check")
+                            {
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_view_pv" "#<ifstr(@@(producto,'#visible')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="check_req_ns"){$"Visible en Punto de Venta"}
+                                input(type="hidden" name="visible" id="ipt_visible" value="#<@@(producto,'#visible')>")
+                            }
+                            div(class="form-check")
+                            {
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_compl_concepto" "#<ifstr(@@(producto,'#uf_complemento')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="check_compl_concepto"){$"Incluir complemento concepto en Comprobante Fiscal Digital"}
+                                input(type="hidden" name="uf_complemento" id="ipt_complemento" value="#<@@(producto,'#uf_complemento')>")
+                            }
+                        }
+                    }
+
+                    // PANEL INVENTARIO Y SUMINISTROS
+                    div(class="tab-pane fade" id="inventario" role="tabpanel" "aria-labelledby"="inventario-tab")
+                    {
+                        div(class="py-4")
+                        {
+                            h6{$"Equivalencia de unidades"}
+                            div(class="row mb-2")
+                            {
+                                div(class="col-sm-6")
+                                {
+                                    div(class="d-flex gap-2")
+                                    {
+                                        div(class="flex-grow-1")
+                                        {
+                                            small{$"Unidad:"}
+                                            input(type="text" class="induxsoft-form-control mb-2" name="unidadc" value="#<@@(producto,'$unidadc')>" maxlength="10")
+                                        }
+                                        div(class="flex-grow-1")
+                                        {
+                                            small{$"Factor:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="factorc" value="#<@@(producto,'#factorc')>" step="0.00000001" max="999999999.9999999")
+                                        }
+                                    }
+                                    div(class="d-flex gap-2")
+                                    {
+                                        div(class="flex-grow-1")
+                                        {
+                                            small{$"Unidad:"}
+                                            input(type="text" class="induxsoft-form-control mb-2" name="unidadd" value="#<@@(producto,'$unidadd')>" maxlength="10")
+                                        }
+                                        div(class="flex-grow-1")
+                                        {
+                                            small{$"Factor:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="factord" value="#<@@(producto,'#factord')>" step="0.00000001" max="999999999.9999999")
+                                        }
+                                    }
+                                    div(class="d-flex gap-2")
+                                    {
+                                        div(class="flex-grow-1")
+                                        {
+                                            small{$"Unidad:"}
+                                            input(type="text" class="induxsoft-form-control mb-2" name="unidade" value="#<@@(producto,'$unidade')>" maxlength="10")
+                                        }
+                                        div(class="flex-grow-1")
+                                        {
+                                            small{$"Factor:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="factore" value="#<@@(producto,'#factore')>" step="0.00000001" max="999999999.9999999")
+                                        }
+                                    }
+                                }
+                                div(class="col-sm-6")
+                                {
+                                    div(class="d-flex gap-2")
+                                    {
+                                        div
+                                        {
+                                            small{$"Máximo:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="maximo" value="#<@@(producto,'#maximo')>" step="0.00000001" max="999999999.9999999")
+                                        }
+                                        div
+                                        {
+                                            small{$"Reorden:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="puntoro" value="#<@@(producto,'#puntoro')>" step="0.00000001" max="999999999.9999999")
+                                        }
+                                    }
+                                    div(class="d-flex gap-2")
+                                    {
+                                        div
+                                        {
+                                            small{$"Mínimo:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="minimo" value="#<@@(producto,'#minimo')>" step="0.00000001" max="999999999.9999999")   
+                                        }
+                                        div
+                                        {
+                                            small{$"Días de entrega:"}
+                                            input(type="number" class="induxsoft-form-control mb-2" name="diasentrega" value="#<@@(producto,'#diasentrega')>")
+                                        }
+                                    }
+                                }
+                            }
+
+                            h6(class="pt-4"){$"Lista de unidades"}
+                            div(class="row")
+                            {
+                                div(class="col-sm-6")
+                                {
+                                    small{$"Proveedor 1:"}
+                                    "input-key"(id="ik_proveedor1" name="proveedor1" "data-value"='#<to.json(prov1)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="nombre" "data-source"="#<@PRODSERV_SEARCH_PROVEEDOR>" columns="codigo,nombre" colcaptions="Código,Nombre" "box-title-text"="Seleccione un proveedor" "box-placeholder-text"="Buscar proveedor" "box-nodata-text"="No se encontraron proveedores"){$""}
+                                
+                                    small{$"Proveedor 2:"}
+                                    "input-key"(id="ik_proveedor2" name="proveedor2" "data-value"='#<to.json(prov2)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="nombre" "data-source"="#<@PRODSERV_SEARCH_PROVEEDOR>" columns="codigo,nombre" colcaptions="Código,Nombre" "box-title-text"="Seleccione un proveedor" "box-placeholder-text"="Buscar proveedor" "box-nodata-text"="No se encontraron proveedores"){$""}
+
+                                    small{$"Proveedor 3:"}
+                                    "input-key"(id="ik_proveedor3" name="proveedor3" "data-value"='#<to.json(prov3)>' "data-key"="sys_pk" "data-search"="codigo" "data-text"="nombre" "data-source"="#<@PRODSERV_SEARCH_PROVEEDOR>" columns="codigo,nombre" colcaptions="Código,Nombre" "box-title-text"="Seleccione un proveedor" "box-placeholder-text"="Buscar proveedor" "box-nodata-text"="No se encontraron proveedores"){$""}
+                                }
+                                div(class="col-sm-6")
+                                {
+                                    small{$"Código del producto:"}
+                                    input(type="text" class="induxsoft-form-control mb-2" name="uf_codigoparaproveedor1" value="#<@@(producto,'$uf_codigoparaproveedor1')>")
+                                    
+                                    small{$"Código del producto:"}
+                                    input(type="text" class="induxsoft-form-control mb-2" name="uf_codigoparaproveedor2" value="#<@@(producto,'$uf_codigoparaproveedor2')>")
+
+                                    small{$"Código del producto:"}
+                                    input(type="text" class="induxsoft-form-control mb-2" name="uf_codigoparaproveedor3" value="#<@@(producto,'$uf_codigoparaproveedor3')>")
+                                }
+                            }
+
+                            h6(class="pt-4"){$"Información adicional"}
+                            div(class="form-check")
+                            {
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_view_pv" "#<ifstr(@@(producto,'#visible')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="check_req_ns"){$"Visible en Punto de Venta"}
+                                input(type="hidden" name="visible" id="ipt_visible" value="#<@@(producto,'#visible')>")
+                            }
+                            div(class="form-check")
+                            {
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_compl_concepto" "#<ifstr(@@(producto,'#uf_complemento')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="check_compl_concepto"){$"Incluir complemento concepto en Comprobante Fiscal Digital"}
+                                input(type="hidden" name="uf_complemento" id="ipt_complemento" value="#<@@(producto,'#uf_complemento')>")
+                            }
+                        }
+                    }
+
+                    // PANEL NOTAS
+                    div(class="tab-pane fade" id="notes" role="tabpanel" "aria-labelledby"="notes-tab")
+                    {
+                        div(class="py-4")
+                        {
+                            small{$"Notas:"}
+                            textarea(name="notas" class="induxsoft-form-control" rows="25"){$"#<@@(producto,'$notas')>"}
+                        }
+                    }
+
+                    // PANEL SAT
+                    div(class="tab-pane fade" id="sat" role="tabpanel" "aria-labelledby"="sat-tab")
+                    {
+                        div(class="py-4")
+                        {
+                            ##
+                            uf_sat_proser = trim(@@(producto,'$uf_sat_proser'))
+                            uf_sat_uniproser = trim(@@(producto,'$uf_sat_uniproser'))
+
+                            if uf_sat_proser == "" { uf_sat_proser = "01010101" }
+                            if uf_sat_uniproser == "" { uf_sat_uniproser = "H87" }
+                            ##
+
+                            small(class="fw-bold"){$"Producto y/o servicio del SAT:"}
+                            input(type="text" class="induxsoft-form-control mb-2" name="uf_sat_proser" value="#<uf_sat_proser>" required="true")
+                            small(class="fw-bold"){$"Unidad del producto y/o servicio del SAT:"}
+                            input(type="text" class="induxsoft-form-control mb-2" name="uf_sat_uniproser" value="#<uf_sat_uniproser>" required="true")
+                        }
+                    }
+                }
+            }
+            div(id="status_bar" class="container-section")
+            {
+                $""
+            }
+        }
+        script(src="#<@JS_MAIN>"){$""}
+        script(src="#<@JS_PRODUCTO>"){$""}
+        script{$'
+            producto.urlFormActn = "#<formActn>";
+            producto.urlBack = "#<@PRODSERV_PRODUCTO>";
+        '}
+    }
+}

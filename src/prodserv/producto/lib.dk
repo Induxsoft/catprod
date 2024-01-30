@@ -1,0 +1,139 @@
+#include "dkli.dkh"
+#!
+module "lib"
+{
+    function lib.def_clases_producto(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "iclase"
+                @"class": "induxsoft-form-select"
+                @"required": "true"
+            }
+            @"text_field": "const"
+            @"value_field": "id"
+            @"selected": value
+        }
+        return def
+    }
+    function lib.def_tipo_comision(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "tipocomision"
+                @"class": "induxsoft-form-select"
+                @"required": "true"
+            }
+            @"text_field": "const"
+            @"value_field": "id"
+            @"selected": value
+        }
+        return def
+    }
+    function lib.def_forma_comision(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "formacomision"
+                @"class": "induxsoft-form-select"
+                @"required": "true"
+            }
+            @"text_field": "const"
+            @"value_field": "id"
+            @"selected": value
+        }
+        return def
+    }
+    function lib.def_tipos_producto(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "itipo"
+                @"class": "induxsoft-form-select"
+                @"required": "true"
+            }
+            @"text_field": "const"
+            @"value_field": "id"
+            @"selected": value
+        }
+        return def
+    }
+    function lib.def_metodo_valuacion(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "metodovaluacion"
+                @"class": "induxsoft-form-select"
+                @"required": "true"
+            }
+            @"text_field": "const"
+            @"value_field": "id"
+            @"selected": value
+        }
+        return def
+    }
+    function lib.def_impuestos(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "impuestos"
+                @"class": "induxsoft-form-select"
+                @"required": "true"
+            }
+            @"text_field": "nombre"
+            @"value_field": "sys_pk"
+            @"selected": value
+        }
+        return def
+    }
+
+    function lib.get_divisa(&db, pk)
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM divisa WHERE sys_pk=@pk LIMIT 1;"
+        return lib.get_data(db, sql, pk)
+    }
+    function lib.get_linea(&db, pk)
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM linea WHERE sys_pk=@pk LIMIT 1;"
+        return lib.get_data(db, sql, pk)
+    }
+    function lib.get_departamento(&db, pk)
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM departamento WHERE sys_pk=@pk LIMIT 1;"
+        return lib.get_data(db, sql, pk)
+    }
+    function lib.get_marca(&db, pk)
+    {
+        sql = "SELECT sys_pk, codigo, descripcion FROM marca WHERE sys_pk=@pk LIMIT 1;"
+        return lib.get_data(db, sql, pk)
+    }
+    function lib.get_proveedor(&db, pk)
+    {
+        sql = "SELECT sys_pk, codigo, nombre FROM proveedor WHERE sys_pk=@pk LIMIT 1;"
+        return lib.get_data(db, sql, pk)
+    }
+    function lib.get_data(&db, sql, pk)
+    {
+        new prm { @"pk": pk }
+        ref rec = dbr.rec(db, sql, prm)
+        return  ifnull(rec, record.create())
+    }
+}

@@ -1,0 +1,165 @@
+#include "dkli.dkh"
+#!
+module "model"
+{
+    #include "../config.dk"
+    #include "../_lib/lib.dk"
+
+    @table_name = "producto"
+
+    function prodserv.crearProducto(&db, &params, &data)
+    {
+        @table_name = "producto"
+        if field.exist(data,"codbar1") && trim(@@(data,"$codbar1")) == "" { data<"codbar1*"> : @null }
+        if field.exist(data,"codbar2") && trim(@@(data,"$codbar2")) == "" { data<"codbar2*"> : @null }
+        if field.exist(data,"codbar3") && trim(@@(data,"$codbar3")) == "" { data<"codbar3*"> : @null }
+        if field.exist(data,"idepartamento") && trim(@@(data,"$idepartamento")) == "" { data<"idepartamento*">:@null }
+        if field.exist(data,"imarca") && trim(@@(data,"$imarca")) == "" { data<"imarca*">:@null }
+        if field.exist(data,"proveedor1") && trim(@@(data,"$proveedor1")) == "" { data<"proveedor1*">:@null }
+        if field.exist(data,"proveedor2") && trim(@@(data,"$proveedor2")) == "" { data<"proveedor2*">:@null }
+        if field.exist(data,"proveedor3") && trim(@@(data,"$proveedor3")) == "" { data<"proveedor3*">:@null }
+        if field.exist(data,"uf_sat_proser") && trim(@@(data,"$uf_sat_proser")) == "" { data<"uf_sat_proser"> : "01010101" }
+        if field.exist(data,"uf_sat_uniproser") && trim(@@(data,"$uf_sat_uniproser")) == "" { data<"uf_sat_uniproser"> : "H87" }
+        
+        if @@(params,"$_entity_id") == "_new" { data<"existencia"> : 0 }
+
+        return entity.create(db, params, data)
+
+        exception
+		{
+			do cu_error("producto")
+			do rise_error(last_error_code(), last_error())
+            do prodserv.prepareView(db, params, data)
+		}
+    }
+    function prodserv.read(&db, &params)
+    {
+        sql_producto = "
+            SELECT IFNULL(idivisa,'') idivisa, IFNULL(ilinea,'') ilinea, IFNULL(idepartamento,'') idepartamento, IFNULL(imarca,'') imarca,
+                IFNULL(proveedor1,'') proveedor1, IFNULL(proveedor2,'') proveedor2, IFNULL(proveedor3,'') proveedor3,
+                sys_pk, sys_recver, iclase, codigo, descripcion, itipo, unidad, IFNULL(factorb,1) factorb, IFNULL(unidadB,'') unidadB,
+                metodovaluacion, impuestos, IFNULL(costoultimo,0) costoultimo, IFNULL(codbar1,'') codbar1, IFNULL(codbar2,'') codbar2,
+                IFNULL(codbar3,'') codbar3, IFNULL(reqserie,0) reqserie, IFNULL(reqlote,0) reqlote, IFNULL(unidadc,'') unidadc,
+                IFNULL(factorc,0) factorc, IFNULL(unidadd,'') unidadd, IFNULL(factord,0) factord, IFNULL(unidade,'') unidade,
+                IFNULL(factore,0) factore, IFNULL(maximo,0) maximo, IFNULL(puntoro,0) puntoro, IFNULL(minimo,0) minimo,
+                IFNULL(diasentrega,0) diasentrega, IFNULL(notas,'') notas, IFNULL(uf_sat_proser,'01010101') uf_sat_proser,
+                IFNULL(uf_sat_uniproser,'H87') uf_sat_uniproser, IFNULL(utilmin,0) utilmin, IFNULL(tipocomision,'') tipocomision,
+                IFNULL(formacomision,'') formacomision, IFNULL(comision,0) comision, IFNULL(ppuntos,0) ppuntos,
+                IFNULL(precio1,0) precio1, IFNULL(precio2,0) precio2, IFNULL(precio3,0) precio3, IFNULL(precio4,0) precio4, IFNULL(precio5,0) precio5,
+                IFNULL(visible,0) visible, IFNULL(uf_complemento,0) uf_complemento
+            FROM producto
+            WHERE sys_pk=@_entity_id LIMIT 1;
+        "
+
+        new data
+        {
+            @"producto*": dbr.rec(db, sql_producto, params)
+        }
+
+        do prodserv.prepareView(db, params, data)
+
+        return data
+    }
+    function prodserv.obtenerDivisas(&db, &params)
+    {
+        return dbr.list(db, "
+            SELECT sys_pk, codigo, descripcion FROM divisa
+            WHERE IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR descripcion LIKE CONCAT('%',@s,'%')));
+        ", params)
+    }
+    function prodserv.obtenerDepartamentos(&db, &params)
+    {
+        return dbr.list(db, "
+            SELECT sys_pk, codigo, descripcion FROM departamento
+            WHERE IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR descripcion LIKE CONCAT('%',@s,'%')));
+        ", params)
+    }
+    function prodserv.obtenerMarcas(&db, &params)
+    {
+        return dbr.list(db, "
+            SELECT sys_pk, codigo, descripcion FROM marca
+            WHERE IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR descripcion LIKE CONCAT('%',@s,'%')));
+        ", params)
+    }
+    function prodserv.obtenerProveedores(&db, &params)
+    {
+        return dbr.list(db,"
+            SELECT sys_pk, codigo, nombre FROM proveedor
+            WHERE IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR nombre LIKE CONCAT('%',@s,'%')));
+        ", params)
+    }
+    function prodserv.obtenerLineas(&db, &params)
+    {
+        query="SELECT sys_pk, clase, codigo, descripcion, IFNULL(notas,'') notas
+            FROM linea
+            WHERE IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR descripcion LIKE CONCAT('%',@s,'%')))
+            ORDER BY codigo
+            LIMIT #<@default_max_rows>;"
+        return dbr.list(db, ftext(query), params)
+    }
+
+    function prodserv.list(&db, &params)
+    {
+        query = "
+            SELECT p.sys_pk, p.codigo, p.descripcion, IFNULL(m.descripcion,'') marca, p.unidad, IFNULL(p.existencia,0) existencia,
+                IFNULL(p.saldo,0) saldo, IFNULL(p.costoultimo,0) costoultimo, REPLACE(SUBSTR(IFNULL(cc.const,''),2),'_',' ') clase,
+                d.descripcion divisa, l.descripcion linea
+            FROM producto p
+                LEFT JOIN marca m ON p.imarca = m.sys_pk
+                INNER JOIN cclaseproducto cc ON p.iclase = cc.id
+                INNER JOIN divisa d ON p.idivisa = d.sys_pk
+                INNER JOIN linea l ON p.ilinea = l.sys_pk
+            WHERE cc.id = 3 OR cc.id = 4
+                AND IF(IFNULL(@s,'')='', true, (p.codigo LIKE CONCAT('%',@s,'%') OR p.descripcion LIKE CONCAT('%',@s,'%')))
+            ORDER BY p.codigo
+            LIMIT #<@default_max_rows>;
+        "
+        return dbr.list(db, ftext(query), params)
+    }
+
+    function cu_error(table)
+    {
+        new fields {
+            @"codbar1": "El código de barras 1"
+            @"codbar2": "El código de barras 2"
+            @"codbar3": "El código de barras 3"
+            @"codigo": "El código"
+            @"descripcion": "La descripción"
+        }
+        do valide_duplicate(fields, table, last_error(), last_error_code())
+    }
+
+    function prodserv.blank(&db, &params)
+    {
+        ref data = record.create()
+        do prodserv.prepareView(db, params, data)
+        return data
+    }
+    function prodserv.prepareView(&db, &params, &data)
+    {
+        sql_tipoprod = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM ctipoproducto ORDER BY id DESC;"
+        sql_metodval = "SELECT id, const FROM cmetodosvaluacion;"
+        sql_impuesto = "SELECT sys_pk, nombre FROM cfgimpuesto;"
+        sql_clasprod = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM cclaseproducto WHERE id = 3 OR id = 4 ORDER BY id DESC;"
+        sql_tipocomi = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM ctiposcomisionesproducto ORDER BY id;"
+        sql_formcomi = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM cformacomisionproducto WHERE id != 0 ORDER BY id;"
+
+        using data
+        {
+            @"tipoprod*": dbr.list(db, sql_tipoprod, @null)
+            @"metodval*": dbr.list(db, sql_metodval, @null)
+            @"impuesto*": dbr.list(db, sql_impuesto, @null)
+            @"clasprod*": dbr.list(db, sql_clasprod, @null)
+            @"tipocomi*": dbr.list(db, sql_tipocomi, @null)
+            @"formcomi*": dbr.list(db, sql_formcomi, @null)
+        }
+
+        return data
+    }
+
+    point @create to prodserv.crearProducto
+    point @update to prodserv.crearProducto
+    point @read to prodserv.read
+    point @list to prodserv.list
+    point @blank to prodserv.blank
+}

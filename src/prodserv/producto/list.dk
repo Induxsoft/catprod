@@ -1,0 +1,81 @@
+#include "dkli.dkh"
+#!
+module "list.dk"
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "../config.dk"
+    #include "uielements.v12.dkl"
+    #include "../_lib/scape_special_charactes2.dk"
+
+    do @context.begin(@crud_context)
+    ref productos = @('&.')
+    do scape_special_charactes(productos,"codigo,descripcion")
+
+    new table_definition
+    {
+        @"datatable*": productos
+        @"table_footer": "Mostrando los primeros # productos ordenados por código"
+        member @"columns"
+        {
+            member @"codigo" { @"caption":"Código" }
+            member @"descripcion" { @"caption":"Descipción" }
+            member @"marca" { @"caption":"Marca" }
+            member @"unidad" { @"caption":"Unidad" }
+            member @"existencia" { @"caption":"Existencia" }
+            member @"saldo" { @"caption":"Saldo" }
+            member @"costoultimo" { @"caption":"Costo último" }
+            member @"clase" { @"caption":"Clase" }
+            member @"divisa" { @"caption":"Divisa" }
+            member @"_actions" 
+            { 
+                @"caption":"Acciones" 
+                @"template":ftext('
+                    <div style="display:flex;gap:8px;" class="no-print">
+                        <a href="${`#<@PRODSERV_ADD_EDIT_PRODUCTO>`.replace(`@id`,DataRow.sys_pk)}" class="no-print">Editar</a>
+                        <button>Eliminar</button>
+                    </div>')
+                @"no-print":@true
+            }
+        }
+    }
+
+    header_act::
+    { 
+        #$
+        a(href="#<replace(@PRODSERV_ADD_EDIT_PRODUCTO, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
+    }
+
+    #! point general_act to header_act
+
+    new nav_config
+    {
+        @"title": "Productos y servicios"
+        @"buttons*": general_act
+        @"urlexit": "/"
+    }
+    
+    #$ div(class="container-fluid p-0")
+    {
+        #! do uie.printV12FormBar(nav_config)
+
+        #$ div(id="work_area" class="container-section mt-1 p-2 pt-0")
+        {
+            p{$"#<@('$error/message')>"}
+
+            form(action="./" method="GET" id="form_search" class="no-print my-1 d-flex py-1")
+            {
+                "filter-text"(
+                    "id"="ft_search"
+                    "text-field"="s"
+                    "placeholder"="Buscar por código o descripción"
+                    "form"="#form_search"
+                    "value"="#<@@(@@(@crud_context,'&http/request/get'),'$s')>"
+                    "auto-submit"="true"
+                    "class"="w-100"
+                ){$""}
+            }
+            #! do uie.dbeditable(table_definition, "tbl_clientes")
+        }
+    }
+}
