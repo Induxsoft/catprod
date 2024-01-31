@@ -156,6 +156,11 @@ module "model"
         "
         return dbr.list(db, ftext(query), params)
     }
+    function prodserv.delete(&db, &params)
+    {
+        do dbr.execute(db, "DELETE FROM grupoproductos_producto_ WHERE iproductos=@_entity_id", params)
+        do entity.delete(db, params)
+    }
 
     function cu_error(table)
     {
@@ -210,6 +215,7 @@ module "model"
 
     point @create to prodserv.crearProducto
     point @update to prodserv.crearProducto
+    point @delete to prodserv.delete
     point @read to prodserv.read
     point @list to prodserv.list
     point @blank to prodserv.blank
