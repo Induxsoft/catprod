@@ -3,6 +3,15 @@ model "productos y servicios"
 {
 	#include "induxsoft.abstracts.ddm"
 
+    abstract "NmModel"
+    {
+        @"sys_pk" int key required autoincrement
+        @"sys_timestamp" datetime required
+        @"sys_recver" int
+        @"sys_deleted" bool
+        @"sys_lock" int
+    }
+
 	entity "cclaseproducto" : "EnumModel" {}
 	entity "ctipoproducto" : "EnumModel" {}
 	entity "cmetodosvaluacion" : "EnumModel" {}
@@ -227,6 +236,24 @@ model "productos y servicios"
         @"uf_tipoi4" string(25)
         @"tasa" bool
         @"objetoimp" string(2)
+    }
+
+    entity "grupoproductos" : "TableModel"
+    {
+        @"comision1" decimal(18,8)
+        @"comision2" decimal(18,8)
+        @"comision3" decimal(18,8)
+        @"comision4" decimal(18,8)
+        @"comision5" decimal(18,8)
+        @"nombre" string(25) unique required
+        @"notas" string(4096)
+        @"tasa_iva" decimal(18,8)
+    }
+    
+    entity "grupoproductos_producto_" : "NmModel"
+    {
+        @"iproductos" ref:"producto" required
+        @"igrupos" ref:"grupoproductos" required
     }
 
     // Información de la aplicación

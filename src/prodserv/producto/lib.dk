@@ -104,6 +104,22 @@ module "lib"
         }
         return def
     }
+    function lib.def_grupos_similares(&datatable, value)
+    {
+        new def
+        {
+            @"datatable*": datatable
+            member "attributes"
+            {
+                @"name": "similar_group"
+                @"class": "induxsoft-form-select"
+            }
+            @"text_field": "nombre"
+            @"value_field": "sys_pk"
+            @"selected": value
+        }
+        return def
+    }
 
     function lib.get_divisa(&db, pk)
     {
@@ -135,5 +151,25 @@ module "lib"
         new prm { @"pk": pk }
         ref rec = dbr.rec(db, sql, prm)
         return  ifnull(rec, record.create())
+    }
+    function filter_forma_comision(&formas, tipo)
+    {
+        ref list = list.create()
+        for i = 0; i < list.count(formas)
+        {
+            ref forma = list.obj(formas, i)
+            id_forma = @@(forma, '$id')
+            
+            if tipo == 0 && id_forma == '0' {
+                do list.add(list, forma)
+            }
+            else if  tipo == 1 && (id_forma == '1' || id_forma == '2') {
+                do list.add(list, forma)
+            }
+            else if tipo == 2 && (id_forma == '1' || id_forma == '2' || id_forma == '3') {
+                do list.add(list, forma)
+            }
+        }
+        return list
     }
 }

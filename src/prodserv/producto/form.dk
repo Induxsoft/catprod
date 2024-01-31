@@ -18,7 +18,9 @@ module "form.dk"
     ref impuesto = @("&./impuesto")
     ref clasprod = @("&./clasprod")
     ref tipocomi = @("&./tipocomi")
+    ref grupoprd = @("&./grupoprd")
     ref formcomi = @("&./formcomi")
+    ref formascm = filter_forma_comision(formcomi, @@(producto,'#tipocomision'))
 
     ref database = @("&database")
 
@@ -67,7 +69,6 @@ module "form.dk"
                 #$
                 input(type="hidden" name="sys_pk" value="#<@@(producto, '#sys_pk')>")
                 input(type="hidden" name="sys_recver" value="#<@@(producto, '#sys_recver')>")
-                // input(type="hidden" name="iclase" value="#<field.dnum(producto,'iclase',1)>")
 
                 // NAV TABS
                 ul(class="nav nav-tabs mt-3" id="myTab" role="tablist")
@@ -95,7 +96,9 @@ module "form.dk"
                     // PANEL GENERAL
                     div(class="tab-pane fade show active" id="general" role="tabpanel" "aria-labelledby"="general-tab")
                     {
-                        div(class="border-bottom py-4")
+                        #! isServ = (@@(producto,'#iclase') == 3)
+
+                        #$ div(class="border-bottom py-4")
                         {
                             div(class="row mb-2")
                             {
@@ -146,7 +149,9 @@ module "form.dk"
                                 #$ div(class="col-sm-3")
                                 {
                                     small(class="fw-bold"){$"Tipo:"}
-                                    #! do uie.dbSelect(lib.def_tipos_producto(tipoprod, @@(producto,'itipo')))
+                                    #! ref def_tp = lib.def_tipos_producto(tipoprod, @@(producto,'itipo'))
+                                    if isServ { def_tp<"attributes/disabled">:"" }
+                                    do uie.dbSelect(def_tp)
                                 }
                             }
                         }
@@ -180,7 +185,7 @@ module "form.dk"
                                         small(class="fw-bold"){$"Unidad estandar:"}
                                         div(class="d-flex gap-2 align-items-center")
                                         {
-                                            input(type="text" class="induxsoft-form-control" name="unidad" value="#<field.dstr(producto,'unidad','PZA')>" required="true" maxlength="10")
+                                            input(type="text" class="induxsoft-form-control elem-unidad" name="unidad" value="#<field.dstr(producto,'unidad','PZA')>" required="true" maxlength="10" "#<ifstr(isServ,'disabled','')>"="")
                                             p(class="m-0"){$"x"}
                                         }
                                     }
@@ -189,14 +194,14 @@ module "form.dk"
                                         small{$"Factor:"}
                                         div(class="d-flex gap-2 align-items-center")
                                         {
-                                            input(type="number" class="induxsoft-form-control" name="factorb" value="#<field.dnum(producto,'factorb',1)>")
+                                            input(type="number" class="induxsoft-form-control elem-unidad" name="factorb" value="#<field.dnum(producto,'factorb',1)>" "#<ifstr(isServ,'disabled','')>"="")
                                             p(class="m-0"){$"="}
                                         }
                                     }
                                     div
                                     {
                                         small{$"Unidad de compra:"}
-                                        input(type="text" class="induxsoft-form-control" name="unidadB" value="#<field.dstr(producto,'unidadB','PZA')>" maxlength="10")
+                                        input(type="text" class="induxsoft-form-control elem-unidad" name="unidadB" value="#<field.dstr(producto,'unidadB','PZA')>" maxlength="10" "#<ifstr(isServ,'disabled','')>"="")
                                     }
                                 }
                                 div(class="d-flex justify-content-center")
@@ -211,13 +216,13 @@ module "form.dk"
                             {
                                 div(class="form-check")
                                 {
-                                    input(class="form-check-input induxsoft-corners" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true")
+                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true" "#<ifstr(isServ,'disabled','')>"="")
                                     label(class="form-check-label" "for"="check_req_ns"){$"Requiere manejar número de serie"}
                                     input(type="hidden" name="reqserie" id="ipt_reqserie" value="#<@@(producto,'#reqserie')>" required="true")
                                 }
                                 div(class="form-check")
                                 {
-                                    input(class="form-check-input induxsoft-corners" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true")
+                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true" "#<ifstr(isServ,'disabled','')>"="")
                                     label(class="form-check-label" "for"="check_req_lt"){$"Requiere manejar lotes"}
                                     input(type="hidden" name="reqlote" id="ipt_reqlote" value="#<@@(producto,'#reqlote')>" required="true")
                                 }
@@ -228,7 +233,10 @@ module "form.dk"
                     // PANEL PRECIO Y CONTROL
                     div(class="tab-pane fade" id="control" role="tabpanel" "aria-labelledby"="control-tab")
                     {
-                        div(class="border-bottom py-4")
+                        #! sinComi = (@@(producto,'#tipocomision') == 0)
+                        comiXPrice = (@@(producto,'#formacomision') == 2)
+
+                        #$ div(class="border-bottom py-4")
                         {
                             div(class="row mb-2")
                             {
@@ -273,12 +281,14 @@ module "form.dk"
                                 #$ div(class="col-sm-3")
                                 {
                                     small{$"Forma de comisión"}
-                                    #! do uie.dbSelect(lib.def_forma_comision(formcomi, @@(producto,'formacomision')))
+                                    #! ref def_forma = lib.def_forma_comision(formascm, @@(producto,'formacomision'))
+                                    if sinComi { def_forma<"attributes/disabled">:"" }
+                                    do uie.dbSelect(def_forma)
                                 }
                                 #$ div(class="col-sm-3")
                                 {
                                     small{$"Comisión"}
-                                    input(type="number" class="induxsoft-form-control mb-2" name="comision" value="#<@@(producto,'#comision')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision" value="#<@@(producto,'#comision')>" step="0.00000001" max="999999999.9999999" "#<ifstr(sinComi || comiXPrice, 'disabled', '')>"="")
                                 }
                                 div(class="col-sm-3")
                                 {
@@ -289,34 +299,43 @@ module "form.dk"
                         }
                         div(class="border-bottom py-4")
                         {
-                            h6{$"Precios antes de impuestos"}
-                            div(class="row mb-2")
+                            div(class="row mb-4")
                             {
-                                div(class="col-4")
+                                div(class="col-5 col-sm-3")
                                 {
-                                    input(type="number" class="induxsoft-form-control mb-2" name="precio1" value="#<@@(producto,'#precio1')>" step="0.00000001" max="999999999.9999999")
-                                    input(type="number" class="induxsoft-form-control mb-2" name="precio2" value="#<@@(producto,'#precio2')>" step="0.00000001" max="999999999.9999999")
-                                    input(type="number" class="induxsoft-form-control mb-2" name="precio3" value="#<@@(producto,'#precio3')>" step="0.00000001" max="999999999.9999999")
-                                    input(type="number" class="induxsoft-form-control mb-2" name="precio4" value="#<@@(producto,'#precio4')>" step="0.00000001" max="999999999.9999999")
-                                    input(type="number" class="induxsoft-form-control mb-2" name="precio5" value="#<@@(producto,'#precio5')>" step="0.00000001" max="999999999.9999999")
+                                    h6{$"Precios antes de impuestos"}
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" name="precio1" value="#<@@(producto,'#precio1')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" name="precio2" value="#<@@(producto,'#precio2')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" name="precio3" value="#<@@(producto,'#precio3')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" name="precio4" value="#<@@(producto,'#precio4')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" name="precio5" value="#<@@(producto,'#precio5')>" step="0.00000001" max="999999999.9999999")
                                 }
-                                div(class="col-4 d-flex flex-wrap flex-row pb-2" style="align-content:space-between;")
+                                div(class="col-2 col-sm-1 d-flex flex-wrap flex-row pb-2 pt-4" style="align-content:space-between;")
                                 {
                                     div(class="w-100 flex-grow-1"){small(class="d-block"){$"P. Máximo"}}
                                     div{small(class="d-block"){$"P. Mínimo"}}
                                 }
+                                div(class="col-5 col-sm-3 #<ifstr(sinComi || not(comiXPrice),'d-none','')>" id="comisiones_precio_container")
+                                {
+                                    h6{$"Comisiones por precio"}
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision1" value="#<@@(producto,'#comision1')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision2" value="#<@@(producto,'#comision2')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision3" value="#<@@(producto,'#comision3')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision4" value="#<@@(producto,'#comision4')>" step="0.00000001" max="999999999.9999999")
+                                    input(type="number" class="induxsoft-form-control mb-2" name="comision5" value="#<@@(producto,'#comision5')>" step="0.00000001" max="999999999.9999999")
+                                }
                             }
                             div(class="form-check")
                             {
-                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_view_pv" "#<ifstr(@@(producto,'#visible')==1,'checked','')>"="true")
-                                label(class="form-check-label" "for"="check_req_ns"){$"Visible en Punto de Venta"}
-                                input(type="hidden" name="visible" id="ipt_visible" value="#<@@(producto,'#visible')>")
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_flagutil" "#<ifstr(@@(producto,'#flagutilidad')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="check_flagutil"){$"Mantener sincronizado el precio con respecto a la utilidad"}
+                                input(type="hidden" name="flagutilidad" id="ipt_flagutilidad" value="#<@@(producto,'#flagutilidad')>")
                             }
                             div(class="form-check")
                             {
-                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_compl_concepto" "#<ifstr(@@(producto,'#uf_complemento')==1,'checked','')>"="true")
-                                label(class="form-check-label" "for"="check_compl_concepto"){$"Incluir complemento concepto en Comprobante Fiscal Digital"}
-                                input(type="hidden" name="uf_complemento" id="ipt_complemento" value="#<@@(producto,'#uf_complemento')>")
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="check_flaglimites" "#<ifstr(@@(producto,'#flaglimites')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="check_flaglimites"){$"Precios por volumen (Límites)"}
+                                input(type="hidden" name="flaglimites" id="ipt_flaglimites" value="#<@@(producto,'#flaglimites')>")
                             }
                         }
                     }
@@ -326,7 +345,16 @@ module "form.dk"
                     {
                         div(class="py-4")
                         {
-                            h6{$"Equivalencia de unidades"}
+                            div(class="row mb-4")
+                            {
+                                div(class="col-sm-6")
+                                {
+                                    small{$"Grupo de similares:"}
+                                    #! do uie.dbSelect(lib.def_grupos_similares(grupoprd, @@(producto,'similar_group')))
+                                }
+                            }
+
+                            #$ h6{$"Equivalencia de unidades"}
                             div(class="row mb-2")
                             {
                                 div(class="col-sm-6")
@@ -433,7 +461,7 @@ module "form.dk"
                             div(class="form-check")
                             {
                                 input(class="form-check-input induxsoft-corners" type="checkbox" id="check_view_pv" "#<ifstr(@@(producto,'#visible')==1,'checked','')>"="true")
-                                label(class="form-check-label" "for"="check_req_ns"){$"Visible en Punto de Venta"}
+                                label(class="form-check-label" "for"="check_view_pv"){$"Visible en Punto de Venta"}
                                 input(type="hidden" name="visible" id="ipt_visible" value="#<@@(producto,'#visible')>")
                             }
                             div(class="form-check")
@@ -486,6 +514,7 @@ module "form.dk"
         script{$'
             producto.urlFormActn = "#<formActn>";
             producto.urlBack = "#<@PRODSERV_PRODUCTO>";
+            producto.formcomi = #<to.json(formcomi)>;
         '}
     }
 }
