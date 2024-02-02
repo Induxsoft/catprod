@@ -1,0 +1,84 @@
+#include "dkli.dkh"
+#!
+module "index"
+{
+	#include "functions.dkh"
+	#include "serialize.dkh"
+	#include "dbr.dkh"
+	#include "magick.dkh"
+	#include "linux-fixes.dkh"
+
+	//@SITE_INCLUDES="config.dk,lib.dk,magick.lib.dk"
+	#include "config.dk"
+	#include "lib.dk"
+	#include "../lib.dk"
+	#include "magick.lib.dk"
+	//#include "website.dkl"
+
+	//do _map_function(@lib_dbr,"induxsoft.Connections.Manager","ResetStorage","reset","void","void")
+	do cors_xhr()
+	if @@(@http_context,"request/headers/REQUEST_METHOD")=="OPTIONS"{return}
+
+	do set_paths()
+
+	go api_base_service (responseJSONdata:response) 
+	{
+		method=@@(@http_context,"request/headers/REQUEST_METHOD")
+		// auth=@@(@http_context,"$request/headers/http_Authorization")
+		// if trim(auth) == "" { auth = @@(@http_context, "request/get/key") }
+		
+		ref params=@@(@http_context,"&request/get")
+		ref postData=@@(@http_context,"&request/post")
+
+		if isnull(postData)
+		{
+			ref postData=from.json(field.dstr(@http_context,"request/post_string","{}"))
+		}
+		if @@(postData,"#_patch"){method="PATCH"}
+			
+		//@ID_WORKSPACE=@@(params,"$workspace_id")
+
+		method=tolower(method)
+		ref db=openStoreDB(@@(params,"storeid"))
+
+		// if method=="get"{do parse.authorization(db,@@(params,"storeid"),auth)}
+
+		if method=="get"{}
+
+		switch method
+		{
+			case "get"
+			{
+				that @get(db,params)->*data
+			}
+			case "post"
+			{
+				that @post(db,params,postData)->*data
+			}
+			case "patch"
+			{
+				that @patch(db,params,postData)->*data
+			}
+			case "delete"
+			{
+				that @delete(db,params)->*data
+			}
+		}
+		if dbr.is_open(db){do dbr.close(db)}
+
+		using response
+		{
+			@"success":@true
+			@"data*":data
+		}
+
+		exception
+		{
+			using response
+			{
+				@"success":@false
+				@"message":last_error()
+			}
+		}
+	}
+}

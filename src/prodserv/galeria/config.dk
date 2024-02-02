@@ -1,0 +1,19 @@
+#include "dkli.dkh"
+#!
+module "config.dk"
+{
+	// @STATIC_CONTENT_URL="https://plazamundial.net/_storage/"//{storeid}/{sku}/{image_file}
+	// @PATH_STATIC_CONTENT="/usr/plazamundial/_storage"
+
+    @STATIC_CONTENT_URL = "@_protocol://@_host/images/sku/@_sku/"
+    @PATH_STATIC_CONTENT = "web/@_host/images/sku/@_sku/"
+
+	@res_fhd=1920
+    @res_hd=1280
+    @res_xga=1024
+    @res_svga=800
+    @res_vga=640
+    @res_cga=320
+
+    @FIELDS_PRESERVE="width,height,size,variations,src,storeid,sku,id_imagen,id"
+}

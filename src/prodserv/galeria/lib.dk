@@ -1,0 +1,353 @@
+#include "dkli.dkh"
+#!
+module "lib.dk"
+{
+	#!
+	api_base_service::
+    {
+        expose responseJSONdata
+
+        new responseJSONdata
+        {
+            @"success":@true
+        }
+        
+        that
+        
+        @http_context<"response/headers/Content-Type">:"application/json;charset=utf-8"
+        @http_context<"response/output">:"text"
+        @http_context<"response/text">: to.json(responseJSONdata)
+    }
+   
+    #!
+    openStoreDB::pid
+    {
+        // qname=storeQNameById(pid)
+        // return dbr.open(qname)
+        return @@(@http_context, "&session/idp/database")
+    }
+    #!
+    storeExist:: &db, id
+    {
+        new p
+        {
+            @"id":id
+        }
+
+        if tolower(dbr.str(db,"select id from tienda where id=@id",p))==tolower(id)
+        {
+            return @true
+        }
+
+        return @false
+        exception
+        {
+            return @false
+        }
+    }
+    storeExistOrError::storeid
+    {
+        if not(storeExist(openPlazaMundial(),storeid)){do rise_error(500,"No se existe la id de la tienda indicado")}
+    }
+    #!
+    checkStoreOwnership:: &db, id, uid
+    {
+        if uid==""
+        {
+            return @false
+        }
+        
+        new p
+        {
+            @"id":id
+            @"uid":uid
+        }
+
+        if tolower(dbr.str(db,"select propietario from tienda where id=@id",p))==tolower(uid)
+        {
+            return @true
+        }
+
+        if tolower(dbr.str(db,"select c.perfil from colaborador c inner join tienda t on c.tienda=t.sys_pk where t.id=@id and c.perfil=@uid and c.gerente=1;",p))==tolower(uid)
+        {
+            return @true
+        }
+
+        return @false
+
+    }
+    #!
+    dataStore::&db,id
+    {
+        new p{@"id":id}
+
+        return dbr.rec(db,"select * from tienda where id=@id",p)
+    }
+
+    #!
+    getApiKeys::&db,id
+    {
+        ref store=dataStore(db,id)
+
+        return dbr.list(db,"select clave 'key', etiqueta as label, activa as active from claveapi where tienda=@sys_pk;",store)
+    }
+    #!
+    getApiKey::&db,id,apikey
+    {
+        ref store=dataStore(db,id)
+        new p
+        {
+            @"sys_pk":@@(store,"sys_pk")
+            @"apikey":apikey
+        }
+        return dbr.rec(db,"select clave 'key', etiqueta as label, activa as active from claveapi where tienda=@sys_pk and clave=@apikey;",p)
+    }
+    #!
+    parse.authorization::&db,idstore,auth
+    {
+        if trim(auth)==""{do rise_error(500,"Código de autorización vacío")}
+
+        apikey=trim(replace(tolower(auth),"bearer",""))
+
+        new p{@"apikey":apikey}
+
+        ref dbpz=openPlazaMundial()
+
+        ref dtapi=getApiKey(dbpz,idstore,apikey)
+
+        if isnull(dtapi){do rise_error(00,"El apikey no existe.")}
+    }
+    
+    #!
+    cache.resolveFile::original,expected
+    {
+        if not(file.exists(original))
+        {
+            return 0
+        }
+
+        
+        if file.exists(expected)
+        {
+            if file.newer(original,expected)==2
+            {
+                return 2
+            }
+        }
+
+        return 1
+    }
+    #!
+    cache.file_name::id,w,h
+    {
+        return "cache."+str(w)+"x"+str(h)+"."+id
+    }
+   
+    #!
+    generar.cache::path, fileName
+    {
+        cache_fhd=cache.file_name(fileName,@res_fhd,0)
+        cache_hd=cache.file_name(fileName,@res_hd,0)
+        cache_xga=cache.file_name(fileName,@res_xga,0)
+        cache_svga=cache.file_name(fileName,@res_svga,0)
+        cache_vga=cache.file_name(fileName,@res_vga,0)
+        cache_cga=cache.file_name(fileName,@res_cga,0)
+
+        file=path.concat(path,fileName)
+        if not(file.exists(file))
+        {
+            return
+        }
+
+        ref size=image.size(file)
+
+        if isnull(size)
+        {
+            return
+        }
+
+        exception
+        {
+            return
+        }
+
+
+        if field.num(size,"width")>@res_fhd
+        {
+            do generar.cache.archivo(file,path.concat(path,cache_fhd), @res_fhd)
+        }
+
+        if field.num(size,"width")>@res_hd
+        {
+            do generar.cache.archivo(file,path.concat(path,cache_hd), @res_hd)
+        }
+
+        if field.num(size,"width")>@res_xga
+        {
+            do generar.cache.archivo(file,path.concat(path,cache_xga), @res_xga)
+        }
+
+        if field.num(size,"width")>@res_svga
+        {
+            do generar.cache.archivo(file,path.concat(path,cache_svga), @res_svga)
+        }
+
+        if field.num(size,"width")>@res_vga
+        {
+            do generar.cache.archivo(file,path.concat(path,cache_vga), @res_vga)
+        }
+
+        if field.num(size,"width")>@res_cga
+        {
+            do generar.cache.archivo(file,path.concat(path,cache_cga), @res_cga)
+        }
+    }
+    #!
+    wichIsNewer::f1,f2
+    {
+        if not(file.exists(f1))
+        {
+            return -1
+        }
+
+        if not(file.exists(f2))
+        {
+            return -2
+        }
+
+        return file.newer(f1,f2)
+    }
+    generar.cache.archivo::original, copia, w
+    {
+        v=wichIsNewer(original,copia)
+        if v==1 || v==-2
+        {
+            do file.copy(original,copia)
+            do image.resize(copia,w,0)
+            do image.compress(copia,@true,@false)
+
+            if file.len(original)<file.len(copia)
+            {
+                do file.delete(copia)
+            }
+
+            exception { }
+        }
+    }
+    #!
+    cache.secureDel::file
+    {
+        if file.exists(file)
+        {
+            do file.delete(file)
+        }
+
+        exception { }
+    }
+
+    cache.eliminar::path, fileName
+    {
+        if trim(fileName)==""
+        {
+            return
+        }
+
+        cache_fhd=cache.file_name(fileName,@res_fhd,0)
+        cache_hd=cache.file_name(fileName,@res_hd,0)
+        cache_xga=cache.file_name(fileName,@res_xga,0)
+        cache_svga=cache.file_name(fileName,@res_svga,0)
+        cache_vga=cache.file_name(fileName,@res_vga,0)
+        cache_cga=cache.file_name(fileName,@res_cga,0)
+
+        do cache.secureDel(path.concat(path,fileName))
+        do cache.secureDel(path.concat(path,cache_fhd))
+        do cache.secureDel(path.concat(path,cache_hd))
+        do cache.secureDel(path.concat(path,cache_xga))
+        do cache.secureDel(path.concat(path,cache_svga))
+        do cache.secureDel(path.concat(path,cache_vga))
+        do cache.secureDel(path.concat(path,cache_cga))
+
+    }
+
+    updateImg.public:: oldId, id
+    {
+        if oldId==id
+        {
+            return
+        }
+
+        if oldId!=""
+        {
+            do cache.eliminar(@physical_folder_files,oldId)
+        }
+
+        if id==""
+        {
+            return
+        }
+
+        do generar.cache(@physical_folder_files,id)
+    }
+    #!
+    pathSku::storeid,sku
+    {
+        // path= path.concat(@PATH_STATIC_CONTENT,storeDBName(storeid))
+        // return path.concat(path,sku)
+        return @PATH_STATIC_CONTENT
+    }
+    #!
+    agregarImagenAlSKU :: storeId, sku, guid
+    {
+        ref db=openPlazaMundial()
+        new p
+        {
+            @"sku":sku
+            //@"idtienda":storeId
+            @"guidimagen":guid
+        }
+        
+        do dbr.insert(db,"carousel_producto",p)
+        do dbr.close(db)
+    }
+
+    quitarImagenDelSKU :: pk
+    {
+        ref db=openPlazaMundial()
+        new p
+        {
+            @"sys_pk":pk
+        }
+        do dbr.execute(db, "delete from carousel_producto where sys_pk=@sys_pk", p)
+        do dbr.close(db)
+    }
+
+    set_paths::
+    {
+        @STATIC_CONTENT_URL = "web/@_host/images/sku/@_sku/"
+        @PATH_STATIC_CONTENT = "@_protocol://@_host/images/sku/@_sku/"
+
+        @STATIC_CONTENT_URL = replace_paths(@STATIC_CONTENT_URL)
+        @PATH_STATIC_CONTENT = replace_paths(@PATH_STATIC_CONTENT)
+    }
+    replace_paths::path
+    {
+        ref get = @@(@http_context, "&request/get")
+        _prt = @@(@http_context, "request/headers/HTTP_HOST")
+        _hst = @@(@http_context, "request/headers/HTTP_HOST")
+        _cnn = @@(get, "_connection")
+        _agp = @@(get, "_app_group")
+        _etp = @@(get, "_entities_type")
+        _eid = @@(get, "_entity_id")
+        _sku = @@(get, "_sku")
+
+        path = replace(path, "@_protocol", _prt)
+        path = replace(path, "@_host", _hst)
+        path = replace(path, "@_connection", _cnn)
+        path = replace(path, "@_app_group", _agp)
+        path = replace(path, "@_entities_type", _etp)
+        path = replace(path, "@_entity_id", _eid)
+        path = replace(path, "@_sku", _sku)
+
+        return path
+    }
+}
