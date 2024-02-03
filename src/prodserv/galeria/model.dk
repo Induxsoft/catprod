@@ -110,18 +110,17 @@ module "magick.lib.dk"
                     @"descripcion":@@(producto,"$Descripcion")
                 }
                 ref json=create_json(data,@@(params,"$storeid"),@@(f,"$guidimagen"))
-                do getDimensionImage(json,file)
+                do getDimensionImage(json,file)                
                 json<"variations*">:create_variations(pathfile,@@(data,"$id"),params)
 
                 do list.add(lfiles,json)
             }
-            
         }
     	return lfiles
     }
     magick.post::&db,&params,&data
     {
-        do rise_error(0, to.json(field.obj(@http_context, "request/files")))
+        if isnull(data) { ref data = record.create() }
         ref rmetadatos=record.copy(data,"*")
 
         //do storeExistOrError(@@(params,"$storeid"))
@@ -142,8 +141,10 @@ module "magick.lib.dk"
         ref json=record.create()
 
 
-        for i=0;i<@count(files) && i<1
+        for i=0;i<@count(files) //&& i<1
         {
+            if i>0{data<"id">:uuid()} // id automático para varias imágenes
+
             ref f=@item(files,i)
             filename=@@(data,"$id")+file.extension(@@(f,"filename"))
             file=path.concat(pathfile,filename)

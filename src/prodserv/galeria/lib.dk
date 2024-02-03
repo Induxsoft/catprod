@@ -146,6 +146,7 @@ module "lib.dk"
     #!
     generar.cache::path, fileName
     {
+        
         cache_fhd=cache.file_name(fileName,@res_fhd,0)
         cache_hd=cache.file_name(fileName,@res_hd,0)
         cache_xga=cache.file_name(fileName,@res_xga,0)
@@ -158,7 +159,7 @@ module "lib.dk"
         {
             return
         }
-
+        
         ref size=image.size(file)
 
         if isnull(size)
@@ -171,7 +172,7 @@ module "lib.dk"
             return
         }
 
-
+        
         if field.num(size,"width")>@res_fhd
         {
             do generar.cache.archivo(file,path.concat(path,cache_fhd), @res_fhd)
@@ -308,7 +309,7 @@ module "lib.dk"
         }
         
         do dbr.insert(db,"carousel_producto",p)
-        do dbr.close(db)
+        //do dbr.close(db)
     }
 
     quitarImagenDelSKU :: pk
@@ -319,7 +320,7 @@ module "lib.dk"
             @"sys_pk":pk
         }
         do dbr.execute(db, "delete from carousel_producto where sys_pk=@sys_pk", p)
-        do dbr.close(db)
+        //do dbr.close(db)
     }
 
     set_paths::

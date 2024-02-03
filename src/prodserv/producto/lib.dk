@@ -184,11 +184,12 @@ module "lib"
                 url = @@(img,"src")
                 mini = @@(img,"src")
                 
-                ref vars = ifnull(@@(img,"variations"), list.create())
+                ref vars = ifnull(@@(img,"&variations"), list.create())
                 ref min_var = get_variation_with_min_value(vars,"size")
                 
                 new ml_img
                 {
+                    @"id": @@(img,"$id")
                     @"url": url
                     @"mini": field.dstr(min_var, "src", mini)
                 }
@@ -207,7 +208,7 @@ module "lib"
             ref obj = list.obj(lst,i)
             if i == 0 { ref variation = obj }
             if @@(obj,"#"+field) < @@(variation, "#"+field){
-                variation = obj
+                ref variation = obj
             }
         }
 

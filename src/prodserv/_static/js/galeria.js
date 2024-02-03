@@ -2,19 +2,25 @@ var galeria =
 {
     product:null,
     url_images:'',
+    url_image:'',
     img_max_size:0,
     tem_img_list : [],
+    image_selected: null,
 
     init()
     {
         const mdl_ai_btn_accept = document.querySelector('#mdl_ai_btn_accept');
         const mdl_ai_drop_image = document.querySelector('#mdl_ai_drop_image');
         const mdl_ai_input_file = document.querySelector('#mdl_ai_ipt_file');
+        const media_list_images = document.querySelector('#ml_p_images');
+        const butn_delete_image = document.querySelector('#delete_image');
 
         if (mdl_ai_btn_accept) mdl_ai_btn_accept.addEventListener('click', () => this.upload_images());
         if (mdl_ai_drop_image) mdl_ai_drop_image.addEventListener('click', () => { if (mdl_ai_input_file) mdl_ai_input_file.click(); });
         if (mdl_ai_input_file) mdl_ai_input_file.addEventListener('change', () => { this.prepareToUpImage(mdl_ai_input_file); })
         if (mdl_ai_drop_image) this.setDropImageEvent(mdl_ai_drop_image);
+        if (media_list_images){ media_list_images.onClicking = (data) => { this.image_selected = data; };}
+        if (butn_delete_image) butn_delete_image.addEventListener('click', () => this.deleteCurrentImage());
     },
 
     //=============== IMAGES
@@ -50,8 +56,8 @@ var galeria =
                 this.showSpiner(false);
                 if (success.errors && success.errors.length > 0)
                     success.errors.forEach(error => alert(error));
-                this.get_images();
                 this.closeModal('modal_add_image');
+                window.location.reload();
             },
             failure => {
                 alert("Ocurrió un error al subir las imagenes.\n\n"+JSON.stringify(failure));
@@ -131,6 +137,31 @@ var galeria =
     valideImageFormat(image)
     {
         return (['image/png','image/jpeg','image/jpg'].find(t => t == image.type) ? true : false)
+    },
+    deleteCurrentImage()
+    {
+        if (!this.image_selected) {
+            alert('Debe elegir una imagen para continuar.');
+            return;
+        }
+
+        if (!confirm('¿Está seguro de eliminar la imagen seleccionada?')) return;
+        
+        let img = this.image_selected.id;
+        let sku = (this.product?.codigo??'');
+        let url = this.url_image;
+
+        url = url.replace('@sku', sku);
+        url = url.replace('@image_id', img);
+
+        InduxsoftCrudlModel.InvokeService(url, null,
+            success => {
+                window.location.reload();
+            },
+            failure => {
+                alert(failure.message ?? failure);
+            }, "DELETE", false
+        );
     },
 
     //=============== UTILS

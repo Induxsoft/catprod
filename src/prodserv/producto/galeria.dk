@@ -6,6 +6,7 @@ module
     #include "serialize.dkh"
     #include "../config.dk"
     #include "lib.dk"
+    #include "../_lib/icons.dk"
     #include "uielements.v12.dkl"
 
     do @context.begin(@crud_context)
@@ -32,18 +33,20 @@ module
         {
             div(class="px-2")
             {
-                div(class="d-flex align-items-center p-2 border" style="background-color:#F5F5F5;")
+                div(class="d-flex flex-wrap align-items-center p-2 border" style="background-color:#F5F5F5;")
                 {
-                    small(class="flex-grow-1 fz-7 text-secondary"){$"Imagenes del producto"}
+                    small(class="flex-grow-1 fz-7 text-secondary"){$"#<@@(producto,'descripcion')>"}
+                    button(class="btn btn-sm d-flex align-items-center gap-2 py-0 text-secondary induxsoft-corners" id="delete_image") {
+                        $"#<@ICON_TRASH>"
+                        $"Eliminar"
+                    }
                     button(class="btn btn-sm d-flex align-items-center gap-2 py-0 text-secondary induxsoft-corners" "data-bs-toggle"="modal" "data-bs-target"="#modal_add_image") {
-                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16") {
-                            path("fill-rule"="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z")
-                        }
+                        $"#<@ICON_PLUS_LG>"
                         $"Agregar"
                     }
                 }
             }
-            div(class="w-100 p-2 pt-0" style="height: 17vh; overflow: auto;")
+            div(class="w-100 p-2 pt-0" style="max-height: 80vh; overflow: auto;")
             {
                 "media-list"(
                     id="ml_p_images"
@@ -56,6 +59,7 @@ module
                     "media-prop"="url"
                     "miniature-prop"="mini"
                     "back-color-media"="transparent"
+                    "outline-selected"="true"
                 ){$""}
             }
         }
@@ -120,6 +124,7 @@ module
         script(src="#<@JS_GALERIA>"){$""}
         script{$'
             galeria.url_images = "#<@URL_IMAGES>";
+            galeria.url_image = "#<@URL_IMAGE>";
             galeria.product = #<to.json(producto)>;
             galeria.img_max_size = #<@img_max_size>;
             galeria.img_max_up = #<@img_max_up>;
