@@ -256,6 +256,18 @@ model "productos y servicios"
         @"igrupos" ref:"grupoproductos" required
     }
 
+    entity "carousel_producto"
+    {
+        @"sys_pk" int key required autoincrement
+        @"sku" string(45)
+        @"guidimagen" string(45)
+
+        index "idx_sku"
+        {
+            field "sku"
+        }
+    }
+
     // Información de la aplicación
     entity "sys_app_catalog"
     {

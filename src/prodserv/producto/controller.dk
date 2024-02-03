@@ -34,5 +34,12 @@ module "controller"
             point @list to prodserv.obtenerLineas
             break
         }
+        case "galeria"
+        {
+            @table_name = "producto"
+            point @read to prodserv.obtenerGaleria
+
+            @form_view = "galeria.dk"
+        }
     }
 }

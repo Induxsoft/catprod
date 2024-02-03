@@ -5,10 +5,13 @@ module "config"
     // _STATIC
     @JS_MAIN = "/$/prodserv/js/main.js"
     @JS_PRODUCTO = "/$/prodserv/js/producto.js"
+    @JS_GALERIA = "/$/prodserv/js/galeria.js"
+    @CSS_GALERIA = "/$/prodserv/css/galeria.css"
 
     // _PACKAGE
     @PRODSERV_PRODUCTO = "/!/prodserv/productos/"
     @PRODSERV_LINEA = "/!/prodserv/linea/"
+    @PRODSERV_GALERIA = "/!/prodserv/productos/@id/galeria/"
 
     @PRODSERV_ADD_EDIT_PRODUCTO = "/!/prodserv/productos/@id/"
 
@@ -18,7 +21,14 @@ module "config"
     @PRODSERV_SEARCH_MARCA  = "/!/prodserv/productos/?_view=marca&s=@search"
     @PRODSERV_SEARCH_PROVEEDOR  = "/!/prodserv/productos/?_view=proveedor&s=@search"
 
+    @URL_IMAGES = "/!/prodserv/galeria/@sku/"
+    @URL_IMAGE = "/!/prodserv/galeria/@sku/@image_id/"
+
     @default_max_rows=250
+
+    // Upload images
+	@img_max_size = 1048576 * 10 // 10MB to Bytes
+	@img_max_up = 5
 
     new @icons
     {

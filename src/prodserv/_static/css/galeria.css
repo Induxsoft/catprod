@@ -1,0 +1,25 @@
+.drop-image-container {
+    border: 2px dashed;
+    height: 16rem;
+    background-color: #FFF;
+    position: relative;
+}
+#mdl_ai_drop_image:hover {
+    background-color: rgba(160, 160, 160, .1);
+}
+#mdl_ai_drop_image {
+    cursor: pointer;
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0);
+}
+.over-image {
+    background-color: rgba(160, 160, 160, .1) !important;
+}
+
+/* SPINNER */
+
+#spinner-containner { display: none; height: 100%; width: 100%; background-color: rgba(255, 255, 255, .5); position: absolute;top:0; align-items: center; justify-content: center; z-index: 100000000; }
+#spinner { display: inline-block; width: 50px; height: 50px; border: 6px solid #3C92DC; border-radius: 50%; border-top-color: #F4F7FF; animation: spin 1s ease-in-out infinite; -webkit-animation: spin 1s ease-in-out infinite; }
+
+@keyframes spin { to { -webkit-transform: rotate(360deg); } }
+@-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }

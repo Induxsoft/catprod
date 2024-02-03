@@ -1,0 +1,128 @@
+#include "dkli.dkh"
+#!
+module
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "../config.dk"
+    #include "lib.dk"
+    #include "uielements.v12.dkl"
+
+    do @context.begin(@crud_context)
+    ref imagenes = @('&./images')
+    ref producto = @('&./product')
+    ref ml_images = set_ml_images(imagenes)
+
+    new nav_config
+    {
+        @"title": "Galería de imágenes"
+        @"urlexit": @PRODSERV_PRODUCTO
+        member "hidden" {
+            @"print": @true
+        }
+    }
+
+    #$ div(class="container-fluid p-0")
+    {
+        link(href="#<@CSS_GALERIA>" rel="stylesheet")
+
+        #! do uie.printV12FormBar(nav_config)
+
+        #$ div(id="pm_images_container")
+        {
+            div(class="px-2")
+            {
+                div(class="d-flex align-items-center p-2 border" style="background-color:#F5F5F5;")
+                {
+                    small(class="flex-grow-1 fz-7 text-secondary"){$"Imagenes del producto"}
+                    button(class="btn btn-sm d-flex align-items-center gap-2 py-0 text-secondary induxsoft-corners" "data-bs-toggle"="modal" "data-bs-target"="#modal_add_image") {
+                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16") {
+                            path("fill-rule"="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z")
+                        }
+                        $"Agregar"
+                    }
+                }
+            }
+            div(class="w-100 p-2 pt-0" style="height: 17vh; overflow: auto;")
+            {
+                "media-list"(
+                    id="ml_p_images"
+                    data='#<to.json(ml_images)>'
+                    "can-arrange"="false"
+                    "can-drag"="false"
+                    "can-drop"="false"
+                    "can-delete"="false"
+                    "highlight-first"="false"
+                    "media-prop"="url"
+                    "miniature-prop"="mini"
+                    "back-color-media"="transparent"
+                ){$""}
+            }
+        }
+
+        // Modal add images
+        div(class="modal fade" id="modal_add_image" tabindex="-1" "aria-labelledby"="exampleModalLabel" "aria-hidden"="true")
+        {
+            div(class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable")
+            {
+                div(class="modal-content rounded-0 p-0")
+                {
+                    div(class="modal-header p-3")
+                    {
+                        h6(class="modal-title" id="exampleModalLabel"){$"Agregar imagenes del producto"}
+                        button(type="button" class="btn-close btn-sm" "data-bs-dismiss"="modal" "aria-label"="Close"){$""}
+                    }
+                    div(class="modal-body p-4 bg-white" id="mdl_cm_data_container")
+                    {
+                        div(class="d-flex flex-column flex-wrap gap-1")
+                        {
+                            div(class="drop-image-container w-100 d-flex align-items-center justify-content-center")
+                            {
+                                div(class="text-center")
+                                {
+                                    h6(class="m-0"){$"Selecciona o arrastra los archivos aquí."}
+                                    //small(class="d-block"){$"Resolución mímina de 500 píxeles en ambos lados y hasta 10 MB de peso."}
+                                    small(class="d-block text-secondary"){$"(Máximo 5 archivos por subida)"}
+                                    input(type="file" id="mdl_ai_ipt_file" accept=".jpg, .jpeg, .png" multiple="true" class="d-none")
+                                }
+                                div(id="mdl_ai_drop_image" class="w-100 h-100")
+                                {
+                                    $""
+                                }
+                            }
+                            div(class="border" style="max-height: 40vh; overflow: auto;")
+                            {
+                                "media-list"(
+                                    id="ml_up_images"
+                                    data=''
+                                    "can-arrange"="false"
+                                    "can-drag"="false"
+                                    "can-drop"="false"
+                                    "can-delete"="true"
+                                    "highlight-first"="false"
+                                    "media-prop"="url"
+                                    "miniature-prop"="mini"
+                                ){$""}
+                            }
+                        }
+                    }
+                    div(class="modal-footer")
+                    {
+                        button(type="button" class="btn btn-sm rounded-0 btn-primary" id="mdl_ai_btn_accept"){$"Subir imagenes"}
+                        button(type="button" class="btn btn-sm rounded-0 btn-light" "data-bs-dismiss"="modal"){$"Cancelar"}
+                    }
+                }
+            }
+        }
+
+        $'<div id="spinner-containner"><div id="spinner"></div></div>'
+
+        script(src="#<@JS_GALERIA>"){$""}
+        script{$'
+            galeria.url_images = "#<@URL_IMAGES>";
+            galeria.product = #<to.json(producto)>;
+            galeria.img_max_size = #<@img_max_size>;
+            galeria.img_max_up = #<@img_max_up>;
+        '}
+    }
+}

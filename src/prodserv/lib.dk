@@ -92,7 +92,8 @@ module "lib"
 
     openStoreDB::pid
 	{
-		return dbr.open(storeQNameById(pid))
+		//return dbr.open(storeQNameById(pid))
+        return @@(@http_context, "&session/idp/database")
 	}
 
     closeDB:: &db

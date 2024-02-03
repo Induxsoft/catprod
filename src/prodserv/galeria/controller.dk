@@ -12,73 +12,82 @@ module "index"
 	#include "config.dk"
 	#include "lib.dk"
 	#include "../lib.dk"
-	#include "magick.lib.dk"
+	//#include "magick.lib.dk"
 	//#include "website.dkl"
 
 	//do _map_function(@lib_dbr,"induxsoft.Connections.Manager","ResetStorage","reset","void","void")
-	do cors_xhr()
-	if @@(@http_context,"request/headers/REQUEST_METHOD")=="OPTIONS"{return}
+	// do cors_xhr()
+	// if @@(@http_context,"request/headers/REQUEST_METHOD")=="OPTIONS"{return}
+
+	ref get = @@(@http_context, "&request/get")
+	
+	if @@(get, "$_entity_id") != "" { get<"sku">: @@(get, "$_entity_id") }
+	if @@(get, "$_view") != "" { get<"id_imagen">: @@(get, "$_view") }
 
 	do set_paths()
 
-	go api_base_service (responseJSONdata:response) 
-	{
-		method=@@(@http_context,"request/headers/REQUEST_METHOD")
-		// auth=@@(@http_context,"$request/headers/http_Authorization")
-		// if trim(auth) == "" { auth = @@(@http_context, "request/get/key") }
+	// go api_base_service (responseJSONdata:response) 
+	// {
+	// 	method=@@(@http_context,"request/headers/REQUEST_METHOD")
+	// 	// auth=@@(@http_context,"$request/headers/http_Authorization")
+	// 	// if trim(auth) == "" { auth = @@(@http_context, "request/get/key") }
 		
-		ref params=@@(@http_context,"&request/get")
-		ref postData=@@(@http_context,"&request/post")
+	// 	ref params=@@(@http_context,"&request/get")
+	// 	ref postData=@@(@http_context,"&request/post")
 
-		if isnull(postData)
-		{
-			ref postData=from.json(field.dstr(@http_context,"request/post_string","{}"))
-		}
-		if @@(postData,"#_patch"){method="PATCH"}
+	// 	if isnull(postData)
+	// 	{
+	// 		ref postData=from.json(field.dstr(@http_context,"request/post_string","{}"))
+	// 	}
+	// 	if @@(postData,"#_patch"){method="PATCH"}
 			
-		//@ID_WORKSPACE=@@(params,"$workspace_id")
+	// 	//@ID_WORKSPACE=@@(params,"$workspace_id")
 
-		method=tolower(method)
-		ref db=openStoreDB(@@(params,"storeid"))
+	// 	method=tolower(method)
+	// 	ref db=openStoreDB(@@(params,"storeid"))
 
-		// if method=="get"{do parse.authorization(db,@@(params,"storeid"),auth)}
+	// 	// if method=="get"{do parse.authorization(db,@@(params,"storeid"),auth)}
 
-		if method=="get"{}
+	// 	if method=="get"{}
 
-		switch method
-		{
-			case "get"
-			{
-				that @get(db,params)->*data
-			}
-			case "post"
-			{
-				that @post(db,params,postData)->*data
-			}
-			case "patch"
-			{
-				that @patch(db,params,postData)->*data
-			}
-			case "delete"
-			{
-				that @delete(db,params)->*data
-			}
-		}
-		if dbr.is_open(db){do dbr.close(db)}
+	// 	switch method
+	// 	{
+	// 		case "get"
+	// 		{
+	// 			that @get(db,params)->*data
+	// 		}
+	// 		case "post"
+	// 		{
+	// 			that @post(db,params,postData)->*data
+	// 		}
+	// 		case "patch"
+	// 		{
+	// 			that @patch(db,params,postData)->*data
+	// 		}
+	// 		case "delete"
+	// 		{
+	// 			that @delete(db,params)->*data
+	// 		}
+	// 	}
+	// 	//if dbr.is_open(db){do dbr.close(db)}
 
-		using response
-		{
-			@"success":@true
-			@"data*":data
-		}
+	// 	using response
+	// 	{
+	// 		@"success":@true
+	// 		@"data*":data
+	// 	}
 
-		exception
-		{
-			using response
-			{
-				@"success":@false
-				@"message":last_error()
-			}
-		}
-	}
+		
+
+	// 	exception
+	// 	{
+	// 		using response
+	// 		{
+	// 			@"success":@false
+	// 			@"message":last_error()
+	// 		}
+	// 	}
+
+	// 	do rise_error(0, to.json(response))
+	// }
 }

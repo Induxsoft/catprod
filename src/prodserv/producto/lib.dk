@@ -172,4 +172,45 @@ module "lib"
         }
         return list
     }
+
+    function set_ml_images(&images)
+    {
+        ref list = list.create()
+        if not(isnull(images)) && list.count(images) > 0
+        {
+            for i = 0; i < list.count(images)
+            {
+                ref img = list.obj(images,i)
+                url = @@(img,"src")
+                mini = @@(img,"src")
+                
+                ref vars = ifnull(@@(img,"variations"), list.create())
+                ref min_var = get_variation_with_min_value(vars,"size")
+                
+                new ml_img
+                {
+                    @"url": url
+                    @"mini": field.dstr(min_var, "src", mini)
+                }
+                do list.add(list, ml_img)
+            }
+        }
+
+        return list
+    }
+    function get_variation_with_min_value(&lst,field)
+    {
+        ref variation = record.create()
+        
+        for i = 0; i < list.count(lst)
+        {
+            ref obj = list.obj(lst,i)
+            if i == 0 { ref variation = obj }
+            if @@(obj,"#"+field) < @@(variation, "#"+field){
+                variation = obj
+            }
+        }
+
+        return variation
+    }
 }

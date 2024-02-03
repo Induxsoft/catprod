@@ -2,6 +2,8 @@
 #!
 module "model"
 {
+    #include "webcl.dkh"
+
     #include "../config.dk"
     #include "../_lib/lib.dk"
 
@@ -211,6 +213,40 @@ module "model"
 
         do list.ins(list, 0, empty)
         return list
+    }
+
+    function prodserv.obtenerGaleria(&db, &params)
+    {
+        ref product = dbr.rec(db, "SELECT codigo, descripcion FROM producto WHERE sys_pk=@_entity_id", params)
+
+        sku = ""
+        if isnull(product) { do rise_error(0, "El producto no existe") }
+        sku = @@(product, "$codigo")
+
+        endpoint = @URL_IMAGES
+        endpoint = replace(endpoint, "@sku", sku)
+        endpoint = add_host_to_url(endpoint)
+        
+        response = http.request(endpoint, "GET", @null, '')
+        ref data = from.json(response)
+
+        new res
+        {
+            @"product*": product
+            @"images*": data
+        }
+
+        return res
+    }
+    function add_host_to_url(url)
+    {
+        method = @@(@http_context, "request/headers/REQUEST_SCHEME")
+        host = @@(@http_context, "request/headers/HTTP_HOST")
+        port = @@(@http_context, "request/headers/SERVER_PORT")
+
+        url = path.concat(method+"://"+host+":"+port, url)
+
+        return (url + "?ids=" + @@(@http_context, "session/user/ids"))
     }
 
     point @create to prodserv.crearProducto

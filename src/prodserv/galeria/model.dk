@@ -84,7 +84,7 @@ module "magick.lib.dk"
     magick.get::&db,&params
     {
         //do storeExistOrError(@@(params,"$storeid"))
-
+        
     	ref producto=getProductoBySKU(db,@@(params,"$sku"))
     	if isnull(producto){do rise_error(500,"SKU no encontrado")}
 
@@ -121,6 +121,7 @@ module "magick.lib.dk"
     }
     magick.post::&db,&params,&data
     {
+        do rise_error(0, to.json(field.obj(@http_context, "request/files")))
         ref rmetadatos=record.copy(data,"*")
 
         //do storeExistOrError(@@(params,"$storeid"))
@@ -318,8 +319,13 @@ module "magick.lib.dk"
             if isanyword(f,@FIELDS_PRESERVE){do field.remove(data,f)}
         }
     }
-    point @get to magick.get
-    point @post to magick.post
-    point @patch to magick.patch
+    // point @get to magick.get
+    // point @post to magick.post
+    // point @patch to magick.patch
+    // point @delete to magick.delete
+
+    point @read to magick.get
+    point @create to magick.post
+    point @update to magick.patch
     point @delete to magick.delete
 }
