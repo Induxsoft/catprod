@@ -240,7 +240,7 @@ module "model"
     }
     function add_host_to_url(url)
     {
-        method = @@(@http_context, "request/headers/REQUEST_SCHEME")
+        method = ifstr(parse.bool(@@(@http_context,"request/headers/HTTPS")),"https","http")
         host = @@(@http_context, "request/headers/HTTP_HOST")
         port = @@(@http_context, "request/headers/SERVER_PORT")
 

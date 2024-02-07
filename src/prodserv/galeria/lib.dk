@@ -331,7 +331,7 @@ module "lib.dk"
     replace_paths::path
     {
         ref get = @@(@http_context, "&request/get")
-        _prt = @@(@http_context, "request/headers/REQUEST_SCHEME")
+        _prt = ifstr(parse.bool(@@(@http_context,"request/headers/HTTPS")),"https","http")
         _hst = @@(@http_context, "request/headers/HTTP_HOST")
         _cnn = @@(get, "_connection")
         _agp = @@(get, "_app_group")
