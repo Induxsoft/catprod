@@ -85,7 +85,7 @@ module
                                 div(class="text-center")
                                 {
                                     h6(class="m-0"){$"Selecciona o arrastra los archivos aquí."}
-                                    //small(class="d-block"){$"Resolución mímina de 500 píxeles en ambos lados y hasta 10 MB de peso."}
+                                    small(class="d-block"){$"Cada imagen no debe superar #<div(@img_max_size,1048576)> MB de peso."}
                                     small(class="d-block text-secondary"){$"(Máximo 5 archivos por subida)"}
                                     input(type="file" id="mdl_ai_ipt_file" accept=".jpg, .jpeg, .png" multiple="true" class="d-none")
                                 }

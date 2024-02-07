@@ -27,7 +27,7 @@ module "config"
     @default_max_rows=250
 
     // Upload images
-	@img_max_size = 1048576 * 10 // 10MB to Bytes
+	@img_max_size = 1048576 * 3 // 10MB to Bytes
 	@img_max_up = 5
 
     new @icons
