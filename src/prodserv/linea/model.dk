@@ -23,6 +23,7 @@ module "model"
     function create(&db, &params, &data)
     {
         data<"clase">: 4
+        data<"color">: 0
         do entity.create(db, params, data)
         exception
 		{
