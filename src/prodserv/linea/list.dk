@@ -20,13 +20,6 @@ module "list.dk"
         {
             member @"codigo" { @"caption":"Código" }
             member @"descripcion" { @"caption":"Descipción" }
-            member @"comision1" { @"caption":"Comisión1" }
-            member @"comision2" { @"caption":"Comisión2" }
-            member @"comision3" { @"caption":"Comisión3" }
-            member @"comision4" { @"caption":"Comisión4" }
-            member @"comision5" { @"caption":"Comisión5" }
-            member @"descripcion" { @"caption":"Descipción" }
-            member @"notas" { @"caption":"Notas" }
             member @"_actions" 
             { 
                 @"caption":"Acciones" 
