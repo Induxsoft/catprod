@@ -1,0 +1,81 @@
+#include "dkli.dkh"
+#!
+module "list.dk"
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "../config.dk"
+    #include "uielements.v12.dkl"
+    #include "../_lib/scape_special_charactes2.dk"
+
+    do @context.begin(@crud_context)
+    ref lineas = @('&.')
+    do scape_special_charactes(lineas,"codigo,descripcion")
+
+    new table_definition
+    {
+        @"datatable*": lineas
+        @"table_footer": "Mostrando las primeros # líneas ordenadas por código"
+        member @"columns"
+        {
+            member @"codigo" { @"caption":"Código" }
+            member @"descripcion" { @"caption":"Descipción" }
+            member @"comision1" { @"caption":"Comisión1" }
+            member @"comision2" { @"caption":"Comisión2" }
+            member @"comision3" { @"caption":"Comisión3" }
+            member @"comision4" { @"caption":"Comisión4" }
+            member @"comision5" { @"caption":"Comisión5" }
+            member @"descripcion" { @"caption":"Descipción" }
+            member @"notas" { @"caption":"Notas" }
+            member @"_actions" 
+            { 
+                @"caption":"Acciones" 
+                @"template":ftext('
+                    <div style="display:flex;gap:8px;justify-content:center;" class="no-print">
+                        <a href="#<@PRODSERV_LINEA>${DataRow.sys_pk}/" style="cursor:pointer; text-decoration: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Editar</a>
+                        <button onclick="InduxsoftCrudlModel.Delete(${DataRow.sys_pk})" style="cursor:pointer; border: none; outline: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Eliminar</button>
+                    </div>')
+                @"no-print":@true
+            }
+        }
+    }
+
+    header_act::
+    { 
+        #$
+        a(href="#<@PRODSERV_LINEA>_new/" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
+    }
+
+    #! point general_act to header_act
+
+    new nav_config
+    {
+        @"title": "Línea de productos"
+        @"buttons*": general_act
+        @"urlexit": "/"
+    }
+
+    #$ div(class="container-fluid p-0")
+    {
+        #! do uie.printV12FormBar(nav_config)
+
+        #$ div(id="work_area" class="container-section mt-1 p-2 pt-0")
+        {
+            p{$"#<@('$error/message')>"}
+
+            form(action="./" method="GET" id="form_search" class="no-print my-1 d-flex py-1")
+            {
+                "filter-text"(
+                    "id"="ft_search"
+                    "text-field"="s"
+                    "placeholder"="Buscar"
+                    "form"="#form_search"
+                    "value"="#<@@(@@(@crud_context,'&http/request/get'),'$s')>"
+                    "auto-submit"="true"
+                    "class"="w-100"
+                ){$""}
+            }
+            #! do uie.dbeditable(table_definition, "tbl_linea_prods")
+        }
+    }
+}

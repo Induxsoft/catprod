@@ -6,6 +6,7 @@ module "config"
     @JS_MAIN = "/$/prodserv/js/main.js"
     @JS_PRODUCTO = "/$/prodserv/js/producto.js"
     @JS_GALERIA = "/$/prodserv/js/galeria.js"
+    @JS_LINEA = "/$/prodserv/js/linea.js"
     @CSS_GALERIA = "/$/prodserv/css/galeria.css"
 
     // _PACKAGE
