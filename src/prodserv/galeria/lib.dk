@@ -333,6 +333,7 @@ module "lib.dk"
         ref get = @@(@http_context, "&request/get")
         _prt = ifstr(parse.bool(@@(@http_context,"request/headers/HTTPS")),"https","http")
         _hst = @@(@http_context, "request/headers/HTTP_HOST")
+        _por = @@(@http_context, "request/headers/SERVER_PORT")
         _cnn = @@(get, "_connection")
         _agp = @@(get, "_app_group")
         _etp = @@(get, "_entities_type")
@@ -341,6 +342,7 @@ module "lib.dk"
 
         path = replace(path, "@_protocol", _prt)
         path = replace(path, "@_host", _hst)
+        path = replace(path, "@_port", _por)
         path = replace(path, "@_connection", _cnn)
         path = replace(path, "@_app_group", _agp)
         path = replace(path, "@_entities_type", _etp)
