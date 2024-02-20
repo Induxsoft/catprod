@@ -43,7 +43,18 @@ program "instalador"
         "divisa.csv",
     ]')
 	// Lista de permisos iniciales
-    ref permissions_to_import = from.json('[]')
+    ref permissions_to_import = from.json('[
+        "FX1-10-240-000",
+        "FX1-10-240-001",
+        "FX1-10-240-002",
+        "FX1-10-240-003",
+        "FX1-10-240-004",
+        "FX1-10-200-000",
+        "FX1-10-200-001",
+        "FX1-10-200-002",
+        "FX1-10-200-003",
+        "FX1-10-200-004",
+    ]')
 
     // DECLARACIÓN DE FUNCIONES
     ref lib_csv = _import_library("devkron.serialize.csv.dll")

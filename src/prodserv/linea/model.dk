@@ -8,6 +8,8 @@ module "model"
 
     function list(&db, &params)
     {
+        if not(dbr.security.isauth(db,@AUT_ACCESS_LINEA)) { do rise_error(500,"No autorizado") }
+
         query="
             SELECT sys_pk, clase, codigo, descripcion,
                 IFNULL(comision1,0) comision1, IFNULL(comision2,0) comision2, IFNULL(comision3,0) comision3,
@@ -22,6 +24,8 @@ module "model"
     }
     function create(&db, &params, &data)
     {
+        if not(dbr.security.isauth(db,@AUT_CREATE_LINEA)) { do rise_error(500,"No autorizado") }
+
         data<"clase">: 4
         data<"color">: 0
         do entity.create(db, params, data)
@@ -33,6 +37,8 @@ module "model"
     }
     function update(&db, &params, &data)
     {
+        if not(dbr.security.isauth(db,@AUT_UPDATE_LINEA)) { do rise_error(500,"No autorizado") }
+
         do entity.update(db, params, data)
         exception
 		{
@@ -42,6 +48,7 @@ module "model"
     }
     function delete(&db, &params)
     {
+        if not(dbr.security.isauth(db,@AUT_DELETE_LINEA)) { do rise_error(500,"No autorizado") }
         // intentar borrado físico
         do entity.delete(db, params)
         
