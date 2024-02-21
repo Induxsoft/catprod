@@ -54,6 +54,8 @@ module "model"
         
         exception
         {
+            if not(dbr.security.isauth(db,@AUT_DELETE_LINEA)) { do rise_error(500,"No autorizado") }
+            
             // borrado lógico
             sql = "
                 UPDATE linea SET 
