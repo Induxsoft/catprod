@@ -9,6 +9,24 @@ module "model"
 
     @table_name = "producto"
 
+    function check_autocode(&db,table,field,&data)
+    {
+        linea = @@(data, "ilinea")
+        query = "SELECT codigo FROM linea WHERE sys_pk = @ilinea"
+        var = dbr.str(db, query, data)
+        
+        varvalue = dbr.vars.getd(db,"FXCA043","|0000")
+        varvalue = replace(varvalue,"@Linea",var)
+        ref config = dbr.autocode.info(varvalue)
+        config<"start">: 2
+        new_code = dbr.autocode.new(db,table,field,config)
+
+        data<"codigo">: new_code
+
+        exception
+        { }
+    }
+
     function prodserv.crearProducto(&db, &params, &data)
     {
         if @@(params,"$_entity_id") == "_new" && not(dbr.security.isauth(db,@AUT_CREATE_PRODUCTO)) { do rise_error(500,"No autorizado") }
@@ -30,6 +48,7 @@ module "model"
         group = @@(data,"$similar_group")
         do field.remove(data, "similar_group")
 
+        if @@(data,"codigo")=="" { do check_autocode(db,"producto","codigo",data) }
         ref res = entity.create(db, params, data)
 
         if trim(group) != ""
