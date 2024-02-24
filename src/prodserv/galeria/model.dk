@@ -69,7 +69,7 @@ module "magick.lib.dk"
 	getProductoBySKU::&db,sku
 	{
 		new p{@"sku":sku}
-		return dbr.rec(db,"select * from producto where codigo=@sku",p)
+		return dbr.rec(db,"select * from producto where REPLACE(TRIM(codigo),' ', '-')=@sku",p)
 	}
     #!
     filesbd::&params

@@ -247,7 +247,7 @@ module "model"
 
     function prodserv.obtenerGaleria(&db, &params)
     {
-        ref product = dbr.rec(db, "SELECT codigo, descripcion FROM producto WHERE sys_pk=@_entity_id", params)
+        ref product = dbr.rec(db, "SELECT descripcion, REPLACE(TRIM(codigo),' ','-') codigo FROM producto WHERE sys_pk=@_entity_id", params)
 
         sku = ""
         if isnull(product) { do rise_error(0, "El producto no existe") }
