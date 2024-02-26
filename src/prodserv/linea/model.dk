@@ -6,6 +6,18 @@ module "model"
     #include "../_lib/lib.dk"
     @table_name = "linea"
 
+    function check_autocode(&db,table,field,&data)
+    {
+        varvalue = dbr.vars.getd(db,"FXCA059","|0000")
+        ref config = dbr.autocode.info(varvalue)
+        new_code = dbr.autocode.new(db,table,field,config)
+
+        data<"codigo">: new_code
+
+        exception
+        { }
+    }
+
     function list(&db, &params)
     {
         if not(dbr.security.isauth(db,@AUT_ACCESS_LINEA)) { do rise_error(500,"No autorizado") }
@@ -22,19 +34,24 @@ module "model"
             LIMIT #<@default_max_rows>;"
         return dbr.list(db, ftext(query), params)
     }
+
     function create(&db, &params, &data)
     {
         if not(dbr.security.isauth(db,@AUT_CREATE_LINEA)) { do rise_error(500,"No autorizado") }
 
         data<"clase">: 4
         data<"color">: 0
+
+        if @@(data,"codigo")=="" { do check_autocode(db,"linea","codigo",data) }
         do entity.create(db, params, data)
+
         exception
 		{
 			do cu_error("línea")
 			do rise_error(last_error_code(), last_error())
 		}
     }
+
     function update(&db, &params, &data)
     {
         if not(dbr.security.isauth(db,@AUT_UPDATE_LINEA)) { do rise_error(500,"No autorizado") }
@@ -46,6 +63,7 @@ module "model"
 			do rise_error(last_error_code(), last_error())
 		}
     }
+
     function delete(&db, &params)
     {
         if not(dbr.security.isauth(db,@AUT_DELETE_LINEA)) { do rise_error(500,"No autorizado") }
@@ -69,6 +87,7 @@ module "model"
 
         return @true
     }
+
     function cu_error(table)
     {
         new fields {
