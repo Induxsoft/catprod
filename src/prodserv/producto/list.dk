@@ -19,7 +19,7 @@ module "list.dk"
         member @"columns"
         {
             member @"codigo" { @"caption":"Código" }
-            member @"descripcion" { @"caption":"Descipción" }
+            member @"descripcion" { @"caption":"Descripción" }
             member @"marca" { @"caption":"Marca" }
             member @"unidad" { @"caption":"Unidad" }
             member @"existencia" { @"caption":"Existencia" }
