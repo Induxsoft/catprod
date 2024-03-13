@@ -26,7 +26,7 @@ module "form.dk"
 
     entityId = @("$parameters/_entity_id")
     errorMsg = @("$error/message")
-    isNewEnt = (entityId == "_new")
+    @isNewEnt = (entityId == "_new")
     formActn = replace(@PRODSERV_ADD_EDIT_PRODUCTO, "@id", entityId)
 
     ref divsa = lib.get_divisa(database, field.dnum(producto,"idivisa",1))
@@ -37,9 +37,11 @@ module "form.dk"
     ref prov2 = lib.get_proveedor(database, @@(producto,"$proveedor2"))
     ref prov3 = lib.get_proveedor(database, @@(producto,"$proveedor3"))
 
+    exists_mp = dir.exists(@CATBAS_MAS_PRECIOS_PATH)
+
     header_act::
     { 
-        #$
+        if not(@isNewEnt) { #$ button(type="button" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" id="btn_more_prices" title="Más precios"){ $'Más precios' } }
         button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" id="btn_submit"){ $'#<@@(@icons,"save")>' }
     }
 
@@ -47,7 +49,7 @@ module "form.dk"
 
     new nav_config
     {
-        @"title": ifstr(isNewEnt,'Agregar','Editar') + ' producto o servicio'
+        @"title": ifstr(@isNewEnt,'Agregar','Editar') + ' producto o servicio'
         @"buttons*": general_act
         @"urlexit": @PRODSERV_PRODUCTO
         member @"hidden"
@@ -548,6 +550,9 @@ module "form.dk"
         script{$'
             producto.urlFormActn = "#<formActn>";
             producto.urlBack = "#<@PRODSERV_PRODUCTO>";
+            producto.urlMasPrecios = "#<@CATBAS_MAS_PRECIOS>";
+            producto.currentProducto = "#<entityId>";
+            producto.exist_mp_app = #<exists_mp>;
             producto.formcomi = #<to.json(formcomi)>;
         '}
     }

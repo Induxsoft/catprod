@@ -25,6 +25,9 @@ module "config"
     @URL_IMAGES = "/!/prodserv/galeria/@sku/"
     @URL_IMAGE = "/!/prodserv/galeria/@sku/@image_id/"
 
+    @CATBAS_MAS_PRECIOS = "/!/catbas/mas_precios/"
+    @CATBAS_MAS_PRECIOS_PATH = "catbas/mas_precios/"
+
     @default_max_rows=250
 
     // Upload images

@@ -1,6 +1,8 @@
 var producto =
 {
     urlFormActn:'', urlBack:'', formcomi:[],
+    urlMasPrecios:'', exist_mp_app: false,
+    currentProducto: '',
 
     init()
     {
@@ -26,6 +28,7 @@ var producto =
         const tipocomision = document.querySelector('select[name="tipocomision"]');
         const ipt_utilmin = document.querySelector('input[name="utilmin"]');
         const ipt_costoultimo = document.querySelector('input[name="costoultimo"]');
+        const btn_more_prices = document.querySelector('#btn_more_prices');
 
         if (check_req_n && ipt_reqsrie) check_req_n.addEventListener('change', e => { this.set_ipt_check_value(ipt_reqsrie, check_req_n) });
         if (check_req_l && ipt_reqlote) check_req_l.addEventListener('change', e => { this.set_ipt_check_value(ipt_reqlote, check_req_l) });
@@ -47,6 +50,8 @@ var producto =
             ipt_factorb.addEventListener('change', e => { this.valide_factor(ipt_unidad,ipt_factorb,ipt_unidadb,msg_factor) });
             ipt_factorb.addEventListener('keyup', e => { this.valide_factor(ipt_unidad,ipt_factorb,ipt_unidadb,msg_factor) });
         }
+
+        if (btn_more_prices) btn_more_prices.addEventListener('click', () => this.showMorePrices());
     },
     set_ipt_check_value(inputElement, checkElement)
     {
@@ -191,7 +196,15 @@ var producto =
         ipt_prices.forEach(ipt =>{
             ipt.value = Math.add(precio, percent);
         });
-    }
+    },
+    showMorePrices()
+    {
+        if (!this.exist_mp_app){
+            alert('Debe instalar el paquete catbas para continuar.');
+            return;
+        }
+        window.location.href = this.urlMasPrecios + this.currentProducto + '/';
+    },
 }
 
 document.addEventListener('DOMContentLoaded', () => {
