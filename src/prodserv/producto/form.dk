@@ -28,6 +28,7 @@ module "form.dk"
     errorMsg = @("$error/message")
     @isNewEnt = (entityId == "_new")
     formActn = replace(@PRODSERV_ADD_EDIT_PRODUCTO, "@id", entityId)
+    curr_url = url_encode(path.concat(get_base_url(@('&http')),formActn))
 
     ref divsa = lib.get_divisa(database, field.dnum(producto,"idivisa",1))
     ref linea = lib.get_linea(database, @@(producto,"$ilinea"))
@@ -552,6 +553,7 @@ module "form.dk"
             producto.urlBack = "#<@PRODSERV_PRODUCTO>";
             producto.urlMasPrecios = "#<@CATBAS_MAS_PRECIOS>";
             producto.currentProducto = "#<entityId>";
+            producto.curr_url = "#<curr_url>";
             producto.exist_mp_app = #<exists_mp>;
             producto.formcomi = #<to.json(formcomi)>;
         '}

@@ -214,4 +214,12 @@ module "lib"
 
         return variation
     }
+    function get_base_url(context)
+    {
+        method = ifstr(parse.bool(@@(context,"request/headers/HTTPS")),"https","http")
+        host = @@(context, "request/headers/HTTP_HOST")
+        port = @@(context, "request/headers/SERVER_PORT")
+
+        return method+"://"+host+":"+port
+    }
 }

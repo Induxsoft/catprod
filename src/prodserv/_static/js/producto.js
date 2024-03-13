@@ -2,7 +2,7 @@ var producto =
 {
     urlFormActn:'', urlBack:'', formcomi:[],
     urlMasPrecios:'', exist_mp_app: false,
-    currentProducto: '',
+    currentProducto: '', curr_url:'',
 
     init()
     {
@@ -203,7 +203,7 @@ var producto =
             alert('Debe instalar el paquete catbas para continuar.');
             return;
         }
-        window.location.href = this.urlMasPrecios + this.currentProducto + '/';
+        window.location.href = this.urlMasPrecios + this.currentProducto + '/?exit='+this.curr_url;
     },
 }
 
