@@ -10,6 +10,7 @@ module "config"
     @CSS_GALERIA = "/$/prodserv/css/galeria.css"
 
     // _PACKAGE
+    @BATCH_TASKMAN="/!/batch/taskman/"
     @PRODSERV_PRODUCTO = "/!/prodserv/productos/"
     @PRODSERV_LINEA = "/!/prodserv/linea/"
     @PRODSERV_GALERIA = "/!/prodserv/productos/@id/galeria/"
