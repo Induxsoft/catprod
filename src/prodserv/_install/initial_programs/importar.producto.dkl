@@ -1,0 +1,124 @@
+#include "dkli.dkh"
+#!
+program
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "dbr.dkh"
+    #include "batch.v12.dkl"
+
+    ref db = @@(@batch_context,"&database")
+    ref @batchDB = db
+
+    token = @@(@batch_context,"$job/token")
+    steps = @@(@batch_context,"#job/steps")
+    data_file = @@(@batch_context,"$params/archivo")
+
+    if (right(data_file,4) != ".csv") {
+        do file.delete(data_file)
+        do batch.saveLog(token,"Extensión incorrecta del archivo, se esperaba un .csv")
+        return
+    }
+
+    ref lib_csv = _import_library("devkron.serialize.csv.dll")
+    do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
+
+    query1 = "SELECT codigo FROM productos WHERE codigo = @codigo"
+    query2 = "SELECT sys_pk FROM linea WHERE codigo = @ilinea"
+    query3 = "SELECT sys_pk FROM divisa WHERE codigo = @idivisa"
+    query4 = "SELECT sys_pk FROM cclaseproducto WHERE const = @iclase"
+    query5 = "SELECT sys_pk FROM ctipoproducto WHERE const LIKE '@itipo%'"
+    query6 = "SELECT sys_pk FROM cmetodosvaluacion WHERE const = @metodovaluacion"
+    query7 = "SELECT sys_pk FROM cfgimpuesto WHERE nombre LIKE '%@impuestos%' OR nombre LIKE '%@impuestos' OR nombre = @impuestos"
+    query8 = "
+        INSERT INTO linea
+        (codigo, descripcion, ilinea, idivisa, iclase, itipo, unidad, reqlote, reqserie, metodovaluacion, impuestos, existencia, uf_sat_proser, uf_sat_uniproser, sys_guid, sys_timestamp)
+        VALUES (@codigo, @descripcion, @ilinea, @idivisa, @iclase, @itipo, @unidad, @reqlote, @reqserie, @metodovaluacion, @impuestos, @existencia, @uf_sat_proser, @uf_sat_uniproser, @sys_guid, @sys_timestamp)
+    
+    "
+    query9 = "
+        UPDATE linea
+        SET descripcion = @descripcion, ilinea = @ilinea, idivisa = @idivisa, iclase = @iclase, itipo = @itipo, unidad = @unidad, reqlote = @reqlote, reqserie = @reqserie, metodovaluacion = @metodovaluacion, impuestos = @impuestos
+        WHERE codigo = @codigo
+    "
+
+    if file.exists(data_file) {
+        ref data = CsvRead(data_file,"")
+        do file.delete(data_file)
+
+        list_size = @count(data)
+        contador = 0
+        progreso = 0
+        div = (list_size/steps)
+        
+        for i=0; i<list_size {
+            ref itm = record.caseinsensitive(@item(data,i))
+
+            codigo = length(@@(itm,"codigo"))
+            desc = length(@@(itm,"descripcion"))
+            ilinea = length(@@(itm,"ilinea"))
+            idivisa = length(@@(itm,"idivisa"))
+            iclase = length(@@(itm,"iclase"))
+            itipo = length(@@(itm,"itipo"))
+            unidad = length(@@(itm,"unidad"))
+            reqlote = length(@@(itm,"reqlote"))
+            reqser = length(@@(itm,"reqserie"))
+            metval = length(@@(itm,"metodovaluacion"))
+            impuestos = length(@@(itm,"impuestos"))
+
+            if ((codigo < 1 || codigo > 35) || (desc < 1 || desc > 150) || (ilinea < 1 || ilinea > 11) || (idivisa < 1 || idivisa > 11) || (iclase < 1 || iclase > 11) || (itipo < 1 || itipo > 11) || (unidad < 1 || unidad > 10) || (reqlote < 1 || reqlote > 1) || (reqser < 1 || reqser > 1) || (metval < 1 || metval > 11) || (impuestos < 1 || impuestos > 11)) {
+                log = "Error al insertar el registro con codigo = '" + @@(itm,"codigo") + "' y descripcion = '" + @@(itm,"descripcion") + "'"
+                do batch.saveLog(token,log)
+            } else {
+                duplicated = dbr.str(db,query1,itm)
+                valid_ilinea = dbr.str(db,query2,itm)
+
+                if (valid_ilinea != "") {
+                    itm<"ilinea">: valid_ilinea
+                    valid_idivisa = dbr.str(db,query3,itm)
+
+                    if (valid_idivisa != "") {
+                        itm<"idivisa">: valid_idivisa
+                        itm<"iclase">: 'c' + @@(itm,"iclase")
+                        valid_iclase = dbr.str(db,query4,itm)
+
+                        if (valid_iclase != "") {
+                            do print("pasó")
+                        } else {
+                            do batch.saveLog(token,"Error al insertar el registro. No existe un iclase = '" + @@(itm,"iclase") + "' con ese valor.")
+                        }
+                    } else {
+                        do batch.saveLog(token,"Error al insertar el registro. No existe un idivisa = '" + @@(itm,"idivisa") + "' con ese valor.")
+                    }
+                } else {
+                    do batch.saveLog(token,"Error al insertar el registro. No existe un ilinea = '" + @@(itm,"ilinea") + "' con ese valor.")
+                }
+
+                /* if (duplicated != "") {
+                    do dbr.execute(db,query3,itm)
+                } else {
+                    itm<"sys_guid">: uuid()
+                    itm<"sys_timestamp*">: now()
+                    itm<"existencia">: 0
+                    itm<"uf_sat_proser">: "01010101"
+                    itm<"uf_sat_uniproser">: "H87"
+                    do dbr.execute(db,query2,itm)
+                } */
+            }
+
+            contador = contador + 1
+
+            if (contador >= div) {
+                contador = contador - div
+                progreso = progreso + steps
+                do batch.saveLog(token,"En proceso... " + str(progreso) + "%")
+            }
+        }
+
+        exception 
+        {
+            do file.delete(data_file)
+            do batch.saveLog(token,last_error())
+        }
+    }
+}

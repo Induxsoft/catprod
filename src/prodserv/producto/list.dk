@@ -4,8 +4,11 @@ module "list.dk"
 {
     #include "functions.dkh"
     #include "serialize.dkh"
-    #include "../config.dk"
+    #include "dbr.dkh"
     #include "uielements.v12.dkl"
+    #include "../config.dk"
+    #include "../_lib/icons.dk"
+    #include "../_lib/lib.dk"
     #include "../_lib/scape_special_charactes2.dk"
 
     do @context.begin(@crud_context)
@@ -42,7 +45,16 @@ module "list.dk"
     }
 
     header_act::
-    { 
+    {
+        jg = dbr.num(@("&database"),"SELECT sys_pk FROM jobsgroup WHERE name = 'PRODSERV'",@null)
+
+        #! if AppExist(@("&database"),"batch") {
+            #$
+            a(href="#<@BATCH_TASKMAN>#<jg>/importar.producto?exit_url_encode=#<url_encode(@PRODSERV_PRODUCTO)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar productos") {
+                $"#<@ICON_FILE_CSV>"
+            }
+        }
+
         #$
         a(href="#<replace(@PRODSERV_ADD_EDIT_PRODUCTO, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
     }
