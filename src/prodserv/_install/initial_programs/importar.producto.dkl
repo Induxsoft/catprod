@@ -32,8 +32,8 @@ program
     query7 = "SELECT id FROM cmetodosvaluacion WHERE const = @metodovaluacion"
     query8 = "
         INSERT INTO producto
-        (codigo, descripcion, ilinea, idivisa, iclase, itipo, unidad, reqlote, reqserie, metodovaluacion, impuestos, existencia, costoultimo, precio1, precio2, precio3, precio4, precio5, uf_sat_proser, uf_sat_uniproser, sys_guid, sys_timestamp)
-        VALUES (@codigo, @descripcion, @ilinea, @idivisa, @iclase, @itipo, @unidad, @reqlote, @reqserie, @metodovaluacion, @impuestos, @existencia, @costoultimo, @precio1, @precio2, @precio3, @precio4, @precio5, @uf_sat_proser, @uf_sat_uniproser, @sys_guid, @sys_timestamp)
+        (codigo, descripcion, ilinea, idivisa, iclase, itipo, unidad, reqlote, reqserie, metodovaluacion, impuestos, existencia, costoultimo, precio1, precio2, precio3, precio4, precio5, uf_sat_proser, uf_sat_uniproser, sys_guid, sys_dtcreated, sys_timestamp, sys_recver)
+        VALUES (@codigo, @descripcion, @ilinea, @idivisa, @iclase, @itipo, @unidad, @reqlote, @reqserie, @metodovaluacion, @impuestos, @existencia, @costoultimo, @precio1, @precio2, @precio3, @precio4, @precio5, @uf_sat_proser, @uf_sat_uniproser, @sys_guid, @sys_dtcreated, @sys_timestamp, @sys_recver)
     "
     query9 = "
         UPDATE producto
@@ -131,7 +131,9 @@ program
                                                         do dbr.execute(db,query9,itm)
                                                     } else {
                                                         itm<"sys_guid">: uuid()
+                                                        itm<"sys_dtcreated*">: now()
                                                         itm<"sys_timestamp*">: now()
+                                                        itm<"sys_recver">: 0
                                                         itm<"existencia">: 0
                                                         itm<"costoultimo">: 0
                                                         itm<"precio1">: 0
@@ -141,6 +143,7 @@ program
                                                         itm<"precio5">: 0
                                                         itm<"uf_sat_proser">: "01010101"
                                                         itm<"uf_sat_uniproser">: "H87"
+
                                                         do dbr.execute(db,query8,itm)
                                                     }
                                                 } else {
