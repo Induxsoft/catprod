@@ -25,19 +25,19 @@ program
 
     query1 = "SELECT codigo FROM producto WHERE codigo = @codigo"
     query2 = "SELECT codigo FROM producto WHERE descripcion = @descripcion"
-    query3 = "SELECT sys_pk FROM linea WHERE codigo = @ilinea"
-    query4 = "SELECT sys_pk FROM divisa WHERE codigo = @idivisa"
-    query5 = "SELECT id FROM cclaseproducto WHERE const = @iclase"
-    query6 = "SELECT id FROM ctipoproducto WHERE const = @itipo"
+    query3 = "SELECT sys_pk FROM linea WHERE codigo = @linea"
+    query4 = "SELECT sys_pk FROM divisa WHERE codigo = @divisa"
+    query5 = "SELECT id FROM cclaseproducto WHERE const = @clase"
+    query6 = "SELECT id FROM ctipoproducto WHERE const = @tipo"
     query7 = "SELECT id FROM cmetodosvaluacion WHERE const = @metodovaluacion"
     query8 = "
         INSERT INTO producto
-        (codigo, descripcion, ilinea, idivisa, iclase, itipo, unidad, reqlote, reqserie, metodovaluacion, impuestos, existencia, costoultimo, precio1, precio2, precio3, precio4, precio5, uf_sat_proser, uf_sat_uniproser, sys_guid, sys_dtcreated, sys_timestamp, sys_recver)
-        VALUES (@codigo, @descripcion, @ilinea, @idivisa, @iclase, @itipo, @unidad, @reqlote, @reqserie, @metodovaluacion, @impuestos, @existencia, @costoultimo, @precio1, @precio2, @precio3, @precio4, @precio5, @uf_sat_proser, @uf_sat_uniproser, @sys_guid, @sys_dtcreated, @sys_timestamp, @sys_recver)
+        (codigo, descripcion, ilinea, imarca, idivisa, iclase, itipo, unidad, reqlote, reqserie, metodovaluacion, impuestos, existencia, costoultimo, precio1, precio2, precio3, precio4, precio5, uf_sat_proser, uf_sat_uniproser, sys_guid, sys_dtcreated, sys_timestamp, sys_recver)
+        VALUES (@codigo, @descripcion, @linea, @marca, @divisa, @clase, @tipo, @unidad, @reqlote, @reqserie, @metodovaluacion, @impuestos, @existencia, @costoultimo, @precio1, @precio2, @precio3, @precio4, @precio5, @uf_sat_proser, @uf_sat_uniproser, @sys_guid, @sys_dtcreated, @sys_timestamp, @sys_recver)
     "
     query9 = "
         UPDATE producto
-        SET descripcion = @descripcion, ilinea = @ilinea, idivisa = @idivisa, iclase = @iclase, itipo = @itipo, unidad = @unidad, reqlote = @reqlote, reqserie = @reqserie, metodovaluacion = @metodovaluacion, impuestos = @impuestos
+        SET descripcion = @descripcion, ilinea = @linea, imarca = @marca, idivisa = @divisa, iclase = @clase, itipo = @tipo, unidad = @unidad, reqlote = @reqlote, reqserie = @reqserie, metodovaluacion = @metodovaluacion, impuestos = @impuestos
         WHERE codigo = @codigo
     "
 
@@ -55,10 +55,11 @@ program
 
             codigo = length(@@(itm,"codigo"))
             descripcion = length(@@(itm,"descripcion"))
-            ilinea = length(@@(itm,"ilinea"))
-            idivisa = length(@@(itm,"idivisa"))
-            iclase = length(@@(itm,"iclase"))
-            itipo = length(@@(itm,"itipo"))
+            linea = length(@@(itm,"linea"))
+            marca = length(@@(itm,"marca"))
+            divisa = length(@@(itm,"divisa"))
+            clase = length(@@(itm,"clase"))
+            tipo = length(@@(itm,"tipo"))
             unidad = length(@@(itm,"unidad"))
             reqlote = length(@@(itm,"reqlote"))
             reqserie = length(@@(itm,"reqserie"))
@@ -69,14 +70,16 @@ program
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El código (" + @@(itm,"codigo") + ") debe ser de mínimo 1 caracter y máximo 35 caracteres.")
             } else if (descripcion < 1 || descripcion > 150) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La descripción (" + @@(itm,"descripcion") + ") debe ser de mínimo 1 caracter y máximo 150 caracteres.")
-            } else if (ilinea < 1 || ilinea > 11) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La ilinea (" + @@(itm,"ilinea") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
-            } else if (idivisa < 1 || idivisa > 11) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La idivisa (" + @@(itm,"idivisa") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
-            } else if (iclase < 1 || iclase > 11) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La iclase (" + @@(itm,"iclase") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
-            } else if (itipo < 1 || itipo > 16) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El itipo (" + @@(itm,"itipo") + ") debe ser de mínimo 1 caracter y máximo 16 caracteres.")
+            } else if (linea < 1 || linea > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La linea (" + @@(itm,"linea") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (marca < 1 || marca > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La marca (" + @@(itm,"marca") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (divisa < 1 || divisa > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La divisa (" + @@(itm,"divisa") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (clase < 1 || clase > 11) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La clase (" + @@(itm,"clase") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (tipo < 1 || tipo > 16) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El tipo (" + @@(itm,"tipo") + ") debe ser de mínimo 1 caracter y máximo 16 caracteres.")
             } else if (unidad < 1 || unidad > 11) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La unidad (" + @@(itm,"unidad") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else if (reqlote < 0 || reqlote > 1) {
@@ -88,30 +91,30 @@ program
             } else if (impuestos < 1 || impuestos > 11) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El impuesto (" + @@(itm,"impuestos") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else {
-                id_ilinea = dbr.str(db,query3,itm)
+                id_linea = dbr.str(db,query3,itm)
 
-                if (id_ilinea != "") {
-                    itm<"ilinea">: id_ilinea
-                    id_idivisa = dbr.str(db,query4,itm)
+                if (id_linea != "") {
+                    itm<"linea">: id_linea
+                    id_divisa = dbr.str(db,query4,itm)
 
-                    if (id_idivisa != "") {
-                        itm<"idivisa">: id_idivisa
-                        itm<"iclase">: 'c' + @@(itm,"iclase")
-                        id_iclase = dbr.str(db,query5,itm)
+                    if (id_divisa != "") {
+                        itm<"divisa">: id_divisa
+                        itm<"clase">: 'c' + @@(itm,"clase")
+                        id_clase = dbr.str(db,query5,itm)
 
-                        if (id_iclase != "") {
-                            itm<"iclase">: id_iclase
+                        if (id_clase != "") {
+                            itm<"clase">: id_clase
 
-                            if (length(@@(itm,"itipo")) == 13) {
-                                if (toupper(substring(@@(itm,"itipo"),0,13)) == "INVENTARIABLE") { itm<"itipo">: "cInventariable" }
+                            if (length(@@(itm,"tipo")) == 13) {
+                                if (toupper(substring(@@(itm,"tipo"),0,13)) == "INVENTARIABLE") { itm<"tipo">: "cInventariable" }
                             }
 
-                            if (length(@@(itm,"itipo")) == 16) {
-                                if (toupper(substring(@@(itm,"itipo"),0,16)) == "NO INVENTARIABLE") { itm<"itipo">: "cNo_inventariable" }
+                            if (length(@@(itm,"tipo")) == 16) {
+                                if (toupper(substring(@@(itm,"tipo"),0,16)) == "NO INVENTARIABLE") { itm<"tipo">: "cNo_inventariable" }
                             }
 
-                            if (@@(itm,"itipo") == "cInventariable" || @@(itm,"itipo") == "cNo_inventariable") {
-                                itm<"itipo">: dbr.str(db,query6,itm)
+                            if (@@(itm,"tipo") == "cInventariable" || @@(itm,"tipo") == "cNo_inventariable") {
+                                itm<"tipo">: dbr.str(db,query6,itm)
                                 id_metval = dbr.str(db,query7,itm)
 
                                 if (id_metval != "") {
@@ -162,16 +165,16 @@ program
                                     do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un metodovaluacion = '" + @@(itm,"metodovaluacion") + "' con ese valor.")
                                 }
                             } else {
-                                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un itipo = '" + @@(itm,"itipo") + "' con ese valor.")
+                                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un tipo = '" + @@(itm,"tipo") + "' con ese valor.")
                             }
                         } else {
-                            do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una iclase = '" + @@(itm,"iclase") + "' con ese valor.")
+                            do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una clase = '" + @@(itm,"clase") + "' con ese valor.")
                         }
                     } else {
-                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una idivisa = '" + @@(itm,"idivisa") + "' con ese valor.")
+                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una divisa = '" + @@(itm,"divisa") + "' con ese valor.")
                     }
                 } else {
-                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una ilinea = '" + @@(itm,"ilinea") + "' con ese valor.")
+                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una linea = '" + @@(itm,"linea") + "' con ese valor.")
                 }
             }
 
