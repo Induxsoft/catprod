@@ -1,0 +1,32 @@
+[
+    {
+        "id": "prodserv",
+        "caption": "Catálogo de productos y servicios",
+        "help": "Variables del paquete: prodserv",
+        "vars": 
+        [
+            {
+                "varname": "FXCA059",
+                "vardefault": "|0000",
+                "varvalue": "|0000",
+                "varcaption": "Formato para el autocódigo(línea)",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            },
+            {
+                "varname": "FXCA043",
+                "vardefault": "|0000",
+                "varvalue": "|0000",
+                "varcaption": "Formato para el autocódigo(productos)",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            }
+        ]
+    }
+]
