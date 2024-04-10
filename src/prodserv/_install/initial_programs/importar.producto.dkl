@@ -42,7 +42,7 @@ program
     "
     query14 = "
         UPDATE producto
-        SET descripcion = @descripcion, unidad = @unidad, idivisa = @divisa, ilinea = @linea, iclase = @clase, itipo = @tipo, metodovaluacion = @valuacion, costoultimo = @costoultimo, precio1 = @precio1, precio2 = @precio2, precio3 = @precio3, precio4 = @precio4, precio5 = @precio5, impuestos = @impuestos, imarca = @marca, idepartamento = @departamento, codbar1 = @codigobarra1, codbar2 = @codigobarra2, codbar3 = @codigobarra3, reqlote = @reqlote, reqserie = @reqserie
+        SET descripcion = @descripcion, unidad = @unidad, idivisa = @divisa, ilinea = @linea, iclase = @clase, metodovaluacion = @valuacion, costoultimo = @costoultimo, precio1 = @precio1, precio2 = @precio2, precio3 = @precio3, precio4 = @precio4, precio5 = @precio5, impuestos = @impuestos, imarca = @marca, idepartamento = @departamento, codbar1 = @codigobarra1, codbar2 = @codigobarra2, codbar3 = @codigobarra3, reqlote = @reqlote, reqserie = @reqserie
         WHERE codigo = @codigo
     "
 
@@ -64,7 +64,6 @@ program
             divisa = length(@@(itm,"divisa"))
             linea = length(@@(itm,"linea"))
             clase = length(@@(itm,"clase"))
-            tipo = length(@@(itm,"tipo"))
             valuacion = length(@@(itm,"valuacion"))
             cosultimo = length(@@(itm,"costoultimo"))
             precio1 = length(@@(itm,"precio1"))
@@ -94,8 +93,6 @@ program
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La linea (" + @@(itm,"linea") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else if (clase < 1 || clase > 11) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La clase (" + @@(itm,"clase") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
-            } else if (tipo < 1 || tipo > 16) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El tipo (" + @@(itm,"tipo") + ") debe ser de mínimo 1 caracter y máximo 16 caracteres.")
             } else if (valuacion < 1 || valuacion > 12) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La valuación (" + @@(itm,"valuacion") + ") debe ser de mínimo 1 caracter y máximo 12 caracteres.")
             } else if (cosultimo > 27) {
@@ -141,96 +138,90 @@ program
                         if (id_clase != "") {
                             itm<"clase">: id_clase
 
-                            if (length(@@(itm,"tipo")) == 13) {
-                                if (toupper(substring(@@(itm,"tipo"),0,13)) == "INVENTARIABLE") { itm<"tipo">: "cInventariable" }
+                            if (@@(itm,"clase") == "4") {
+                                itm<"tipo">: "cInventariable"
+                            } else {
+                                itm<"tipo">: "cNo_inventariable"
                             }
 
-                            if (length(@@(itm,"tipo")) == 16) {
-                                if (toupper(substring(@@(itm,"tipo"),0,16)) == "NO INVENTARIABLE") { itm<"tipo">: "cNo_inventariable" }
-                            }
+                            itm<"tipo">: dbr.str(db,query6,itm)
+                            id_valuacion = dbr.str(db,query7,itm)
 
-                            if (@@(itm,"tipo") == "cInventariable" || @@(itm,"tipo") == "cNo_inventariable") {
-                                itm<"tipo">: dbr.str(db,query6,itm)
-                                id_valuacion = dbr.str(db,query7,itm)
+                            if (id_valuacion != "") {
+                                itm<"valuacion">: id_valuacion
+                                id_impuestos = dbr.str(db,"SELECT sys_pk FROM cfgimpuesto WHERE nombre LIKE '%" + @@(itm,"impuestos") +"%' OR nombre = @impuestos",itm)
 
-                                if (id_valuacion != "") {
-                                    itm<"valuacion">: id_valuacion
-                                    id_impuestos = dbr.str(db,"SELECT sys_pk FROM cfgimpuesto WHERE nombre LIKE '%" + @@(itm,"impuestos") +"%' OR nombre = @impuestos",itm)
+                                if (id_impuestos != "") {
+                                    itm<"impuestos">: id_impuestos
 
-                                    if (id_impuestos != "") {
-                                        itm<"impuestos">: id_impuestos
+                                    if (@@(itm,"reqlote") == "0" || @@(itm,"reqlote") == "1") {
+                                        if (@@(itm,"reqserie") == "0" || @@(itm,"reqserie") == "1") {
+                                            duplicated = dbr.str(db,query1,itm)
+                                            desc_duplicated = dbr.str(db,query2,itm)
+                                            id_codbar1 = dbr.str(db,query10,itm)
+                                            id_codbar2 = dbr.str(db,query11,itm)
+                                            id_codbar3 = dbr.str(db,query12,itm)
 
-                                        if (@@(itm,"reqlote") == "0" || @@(itm,"reqlote") == "1") {
-                                            if (@@(itm,"reqserie") == "0" || @@(itm,"reqserie") == "1") {
-                                                duplicated = dbr.str(db,query1,itm)
-                                                desc_duplicated = dbr.str(db,query2,itm)
-                                                id_codbar1 = dbr.str(db,query10,itm)
-                                                id_codbar2 = dbr.str(db,query11,itm)
-                                                id_codbar3 = dbr.str(db,query12,itm)
+                                            if (id_codbar1 == "" && id_codbar2 == "" && id_codbar3 == "") {
 
-                                                if (id_codbar1 == "" && id_codbar2 == "" && id_codbar3 == "") {
+                                                if (desc_duplicated == @@(itm,"codigo") || desc_duplicated == "") {
+                                                    id_marca = dbr.str(db,query8,itm)
+                                                    id_departamento = dbr.str(db,query9,itm)
 
-                                                    if (desc_duplicated == @@(itm,"codigo") || desc_duplicated == "") {
-                                                        id_marca = dbr.str(db,query8,itm)
-                                                        id_departamento = dbr.str(db,query9,itm)
-
-                                                        if (id_marca == "") {
-                                                            do batch.saveLog(token,"No existe una marca (" + @@(itm,"marca") + ") con ese valor. Se le ha asignado nulo.")
-                                                            itm<"marca*">: @null
-                                                        } else {
-                                                            itm<"marca">: id_marca
-                                                        }
-
-                                                        if (id_departamento == "") {
-                                                            do batch.saveLog(token,"No existe un departamento (" + @@(itm,"departamento") + ") con ese valor. Se le ha asignado nulo.")
-                                                            itm<"departamento*">: @null
-                                                        } else { itm<"departamento">: id_departamento }
-
-
-                                                        if (@@(itm,"costoultimo") == "") { itm<"costoultimo">: 0 }
-                                                        if (@@(itm,"precio1") == "") { itm<"precio1">: 0 }
-                                                        if (@@(itm,"precio2") == "") { itm<"precio2">: 0 }
-                                                        if (@@(itm,"precio3") == "") { itm<"precio3">: 0 }
-                                                        if (@@(itm,"precio4") == "") { itm<"precio4">: 0 }
-                                                        if (@@(itm,"precio5") == "") { itm<"precio5">: 0 }
-
-                                                        if (@@(itm,"codigobarra1") == "") { itm<"codigobarra1*">: @null }
-                                                        if (@@(itm,"codigobarra2") == "") { itm<"codigobarra2*">: @null }
-                                                        if (@@(itm,"codigobarra3") == "") { itm<"codigobarra3*">: @null }
-
-                                                        if (duplicated != "") {
-                                                            do dbr.execute(db,query14,itm)
-                                                        } else {
-                                                            itm<"sys_guid">: uuid()
-                                                            itm<"sys_dtcreated*">: now()
-                                                            itm<"sys_timestamp*">: now()
-                                                            itm<"sys_recver">: 0
-                                                            itm<"existencia">: 0
-                                                            itm<"uf_sat_proser">: "01010101"
-                                                            itm<"uf_sat_uniproser">: "H87"
-
-                                                            do dbr.execute(db,query13,itm)
-                                                        }
+                                                    if (id_marca == "") {
+                                                        do batch.saveLog(token,"No existe una marca (" + @@(itm,"marca") + ") con ese valor. Se le ha asignado nulo.")
+                                                        itm<"marca*">: @null
                                                     } else {
-                                                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. Ya existe un producto con descripción = '" + @@(itm,"descripcion") + "'")
+                                                        itm<"marca">: id_marca
+                                                    }
+
+                                                    if (id_departamento == "") {
+                                                        do batch.saveLog(token,"No existe un departamento (" + @@(itm,"departamento") + ") con ese valor. Se le ha asignado nulo.")
+                                                        itm<"departamento*">: @null
+                                                    } else { itm<"departamento">: id_departamento }
+
+
+                                                    if (@@(itm,"costoultimo") == "") { itm<"costoultimo">: 0 }
+                                                    if (@@(itm,"precio1") == "") { itm<"precio1">: 0 }
+                                                    if (@@(itm,"precio2") == "") { itm<"precio2">: 0 }
+                                                    if (@@(itm,"precio3") == "") { itm<"precio3">: 0 }
+                                                    if (@@(itm,"precio4") == "") { itm<"precio4">: 0 }
+                                                    if (@@(itm,"precio5") == "") { itm<"precio5">: 0 }
+
+                                                    if (@@(itm,"codigobarra1") == "") { itm<"codigobarra1*">: @null }
+                                                    if (@@(itm,"codigobarra2") == "") { itm<"codigobarra2*">: @null }
+                                                    if (@@(itm,"codigobarra3") == "") { itm<"codigobarra3*">: @null }
+
+                                                    if (duplicated != "") {
+                                                        do dbr.execute(db,query14,itm)
+                                                    } else {
+                                                        itm<"sys_guid">: uuid()
+                                                        itm<"sys_dtcreated*">: now()
+                                                        itm<"sys_timestamp*">: now()
+                                                        itm<"sys_recver">: 0
+                                                        itm<"existencia">: 0
+                                                        itm<"uf_sat_proser">: "01010101"
+                                                        itm<"uf_sat_uniproser">: "H87"
+
+                                                        do dbr.execute(db,query13,itm)
                                                     }
                                                 } else {
-                                                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. Ya existe un producto con alguno de éstos códigos de barras: '" + @@(itm,"codigobarra1") + "', '" + @@(itm,"codigobarra2") + "', '" + @@(itm,"codigobarra3") + "'")
+                                                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. Ya existe un producto con descripción = '" + @@(itm,"descripcion") + "'")
                                                 }
                                             } else {
-                                                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El valor de reqserie (" + @@(itm,"reqserie") + ") no es válido.")
+                                                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. Ya existe un producto con alguno de éstos códigos de barras: '" + @@(itm,"codigobarra1") + "', '" + @@(itm,"codigobarra2") + "', '" + @@(itm,"codigobarra3") + "'")
                                             }
                                         } else {
-                                            do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El valor de reqlote (" + @@(itm,"reqlote") + ") no es válido.")
+                                            do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El valor de reqserie (" + @@(itm,"reqserie") + ") no es válido.")
                                         }
                                     } else {
-                                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un impuesto = '" + @@(itm,"impuestos") + "' con ese valor.")
+                                        do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El valor de reqlote (" + @@(itm,"reqlote") + ") no es válido.")
                                     }
                                 } else {
-                                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una valuación = '" + @@(itm,"valuacion") + "' con ese valor.")
+                                    do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un impuesto = '" + @@(itm,"impuestos") + "' con ese valor.")
                                 }
                             } else {
-                                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe un tipo = '" + @@(itm,"tipo") + "' con ese valor.")
+                                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una valuación = '" + @@(itm,"valuacion") + "' con ese valor.")
                             }
                         } else {
                             do batch.saveLog(token,"No se pudo insertar/actualizar el registro. No existe una clase = '" + @@(itm,"clase") + "' con ese valor.")
