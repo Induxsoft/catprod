@@ -1,10 +1,10 @@
 "id","title","shorttitle","icon16x16","href","_blank","appid","itemtype","req_context_item_id","act_type"
 
-"CF11","Agregar producto","Agregar","","/!/prodserv/productos/_new/","0","prodserv.productos","prodserv","0","action"
-"CF12","Editar producto","Editar","","/!/prodserv/productos/@_src_context_item_id/","0","prodserv.productos","prodserv","1","action"
-"CF13","Eliminar producto","Eliminar","","javascript:InduxsoftCrudlModel.Delete(@_src_context_item_id);","0","prodserv.productos","prodserv","1","action"
-"CF14","Galeria del producto","Galeria","","/!/prodserv/productos/@_src_context_item_id/galeria/","0","prodserv.productos","prodserv","1","action"
+"CF11","Agregar producto","Agregar","","/!/prodserv/productos/_new/","0","prodserv.productos","DET03E","0","action"
+"CF12","Editar producto","Editar","","/!/prodserv/productos/@_src_context_item_id/","0","prodserv.productos","DET03E","1","action"
+"CF13","Eliminar producto","Eliminar","","javascript:InduxsoftCrudlModel.Delete(@_src_context_item_id);","0","prodserv.productos","DET03E","1","action"
+"CF14","Galeria del producto","Galeria","","/!/prodserv/productos/@_src_context_item_id/galeria/","0","prodserv.productos","DET03E","1","action"
 
-"CF21","Agregar linea de productos","Agregar","","/!/prodserv/linea/_new/","0","prodserv.linea","lineaprod","0","action"
-"CF22","Editar linea de productos","Editar","","/!/prodserv/linea/@_src_context_item_id/","0","prodserv.linea","lineaprod","1","action"
-"CF23","Eliminar linea de productos","Eliminar","","javascript:InduxsoftCrudlModel.Delete(@_src_context_item_id);","0","prodserv.linea","lineaprod","1","action"
+"CF21","Agregar linea de productos","Agregar","","/!/prodserv/linea/_new/","0","prodserv.linea","DET02A","0","action"
+"CF22","Editar linea de productos","Editar","","/!/prodserv/linea/@_src_context_item_id/","0","prodserv.linea","DET02A","1","action"
+"CF23","Eliminar linea de productos","Eliminar","","javascript:InduxsoftCrudlModel.Delete(@_src_context_item_id);","0","prodserv.linea","DET02A","1","action"
