@@ -23,24 +23,12 @@ program
     ref lib_csv = _import_library("devkron.serialize.csv.dll")
     do _map_function(lib_csv,"devkron.serialize.csv.csvHelper","CsvRead","CsvRead","System.String,System.String","*")
 
-    query1 = "SELECT codigo FROM producto WHERE codigo = @codigo"
-    query2 = "SELECT codigo FROM producto WHERE descripcion = @descripcion"
-    query3 = "SELECT sys_pk FROM divisa WHERE codigo = @divisa"
-    query4 = "SELECT sys_pk FROM linea WHERE codigo = @linea"
-    query5 = "SELECT id FROM cclaseproducto WHERE const = @clase"
-    query6 = "SELECT id FROM ctipoproducto WHERE const = @tipo"
-    query7 = "SELECT id FROM cmetodosvaluacion WHERE const = @valuacion"
-    query8 = "SELECT sys_pk FROM marca WHERE codigo = @marca"
-    query9 = "SELECT sys_pk FROM departamento WHERE codigo = @departamento"
-    query10 = "SELECT codbar1 FROM producto WHERE codbar1 = @codigobarra1"
-    query11 = "SELECT codbar2 FROM producto WHERE codbar2 = @codigobarra2"
-    query12 = "SELECT codbar3 FROM producto WHERE codbar3 = @codigobarra3"
-    query13 = "
+    query_insert = "
         INSERT INTO producto
         (codigo, descripcion, unidad, idivisa, ilinea, iclase, itipo, metodovaluacion, costoultimo, precio1, precio2, precio3, precio4, precio5, impuestos, imarca, idepartamento, codbar1, codbar2, codbar3, reqlote, reqserie, existencia, uf_sat_proser, uf_sat_uniproser, sys_guid, sys_dtcreated, sys_timestamp, sys_recver)
         VALUES (@codigo, @descripcion, @unidad, @divisa, @linea, @clase, @tipo, @valuacion, @costoultimo, @precio1, @precio2, @precio3, @precio4, @precio5, @impuestos, @marca, @departamento, @codigobarra1, @codigobarra2, @codigobarra3, @reqlote, @reqserie, @existencia, @uf_sat_proser, @uf_sat_uniproser, @sys_guid, @sys_dtcreated, @sys_timestamp, @sys_recver)
     "
-    query14 = "
+    query_update = "
         UPDATE producto
         SET descripcion = @descripcion, unidad = @unidad, idivisa = @divisa, ilinea = @linea, iclase = @clase, metodovaluacion = @valuacion, costoultimo = @costoultimo, precio1 = @precio1, precio2 = @precio2, precio3 = @precio3, precio4 = @precio4, precio5 = @precio5, impuestos = @impuestos, imarca = @marca, idepartamento = @departamento, codbar1 = @codigobarra1, codbar2 = @codigobarra2, codbar3 = @codigobarra3, reqlote = @reqlote, reqserie = @reqserie
         WHERE codigo = @codigo
@@ -91,10 +79,10 @@ program
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La divisa (" + @@(itm,"divisa") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
             } else if (linea < 1 || linea > 11) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La linea (" + @@(itm,"linea") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
-            } else if (clase < 1 || clase > 11) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La clase (" + @@(itm,"clase") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
-            } else if (valuacion < 1 || valuacion > 12) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La valuación (" + @@(itm,"valuacion") + ") debe ser de mínimo 1 caracter y máximo 12 caracteres.")
+            } else if (clase != 1) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La clase (" + @@(itm,"clase") + ") debe ser de 1 caracter.")
+            } else if (valuacion != 1) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La valuación (" + @@(itm,"valuacion") + ") debe ser de 1 caracter.")
             } else if (cosultimo > 27) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El costo último (" + @@(itm,"valuacion") + ") debe ser de máximo 27 caracteres.")
             } else if (precio1 > 27) {
@@ -107,8 +95,8 @@ program
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El precio4 (" + @@(itm,"precio4") + ") debe ser de máximo 27 caracteres.")
             } else if (precio5 > 27) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El precio5 (" + @@(itm,"precio5") + ") debe ser de máximo 27 caracteres.")
-            } else if (impuestos < 1 || impuestos > 11) {
-                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El impuesto (" + @@(itm,"impuestos") + ") debe ser de mínimo 1 caracter y máximo 11 caracteres.")
+            } else if (impuestos < 1 || impuestos > 3) {
+                do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El impuesto (" + @@(itm,"impuestos") + ") debe ser de mínimo 1 caracter y máximo 3 caracteres.")
             } else if (marca > 11) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. La marca (" + @@(itm,"marca") + ") debe ser de máximo 11 caracteres.")
             } else if (departamento > 11) {
@@ -124,49 +112,63 @@ program
             } else if (reqserie != 1) {
                 do batch.saveLog(token,"No se pudo insertar/actualizar el registro. El reqserie (" + @@(itm,"reqserie") + ") debe ser de 1 caracter.")
             } else {
-                id_divisa = dbr.str(db,query3,itm)
+                id_divisa = dbr.str(db,"SELECT sys_pk FROM divisa WHERE codigo = @divisa",itm)
 
                 if (id_divisa != "") {
                     itm<"divisa">: id_divisa
-                    id_linea = dbr.str(db,query4,itm)
+                    id_linea = dbr.str(db,"SELECT sys_pk FROM linea WHERE codigo = @linea",itm)
 
                     if (id_linea != "") {
                         itm<"linea">: id_linea
-                        itm<"clase">: "c" + @@(itm,"clase")
-                        id_clase = dbr.str(db,query5,itm)
+
+                        if (@@(itm,"clase") == "A") { itm<"clase">: "cArticulo" }
+                        if (@@(itm,"clase") == "S") { itm<"clase">: "cServicio" }
+
+                        id_clase = dbr.str(db,"SELECT id FROM cclaseproducto WHERE const = @clase",itm)
 
                         if (id_clase != "") {
                             itm<"clase">: id_clase
 
-                            if (@@(itm,"clase") == "4") {
-                                itm<"tipo">: "cInventariable"
-                            } else {
-                                itm<"tipo">: "cNo_inventariable"
-                            }
+                            if (@@(itm,"valuacion") == "1") { itm<"valuacion">: "PEPS" }
+                            if (@@(itm,"valuacion") == "2") { itm<"valuacion">: "UEPS" }
+                            if (@@(itm,"valuacion") == "3") { itm<"valuacion">: "Promedio" }
+                            if (@@(itm,"valuacion") == "4") { itm<"valuacion">: "Identificado" }
+                            if (@@(itm,"valuacion") == "5") { itm<"valuacion">: "Ninguno" }
 
-                            itm<"tipo">: dbr.str(db,query6,itm)
-                            id_valuacion = dbr.str(db,query7,itm)
+                            id_valuacion = dbr.str(db,"SELECT id FROM cmetodosvaluacion WHERE const = @valuacion",itm)
 
                             if (id_valuacion != "") {
                                 itm<"valuacion">: id_valuacion
-                                id_impuestos = dbr.str(db,"SELECT sys_pk FROM cfgimpuesto WHERE nombre LIKE '%" + @@(itm,"impuestos") +"%' OR nombre = @impuestos",itm)
+
+                                if (@@(itm,"valuacion") == "99") {
+                                    itm<"tipo">: "1"
+                                } else {
+                                    itm<"tipo">: "2"
+                                }
+
+                                if (@@(itm,"impuestos") == "G16") { itm<"impuestos">: "16% IVA (México)" }
+                                if (@@(itm,"impuestos") == "G0") { itm<"impuestos">: "0% IVA (México)" }
+                                if (@@(itm,"impuestos") == "IIE") { itm<"impuestos">: "IVA-IEPS (México)" }
+                                if (@@(itm,"impuestos") == "E") { itm<"impuestos">: "Exento" }
+
+                                id_impuestos = dbr.str(db,"SELECT sys_pk FROM cfgimpuesto WHERE nombre = @impuestos",itm)
 
                                 if (id_impuestos != "") {
                                     itm<"impuestos">: id_impuestos
 
                                     if (@@(itm,"reqlote") == "0" || @@(itm,"reqlote") == "1") {
                                         if (@@(itm,"reqserie") == "0" || @@(itm,"reqserie") == "1") {
-                                            duplicated = dbr.str(db,query1,itm)
-                                            desc_duplicated = dbr.str(db,query2,itm)
-                                            id_codbar1 = dbr.str(db,query10,itm)
-                                            id_codbar2 = dbr.str(db,query11,itm)
-                                            id_codbar3 = dbr.str(db,query12,itm)
+                                            id_codbar1 = dbr.str(db,"SELECT codbar1 FROM producto WHERE codbar1 = @codigobarra1",itm)
+                                            id_codbar2 = dbr.str(db,"SELECT codbar2 FROM producto WHERE codbar2 = @codigobarra2",itm)
+                                            id_codbar3 = dbr.str(db,"SELECT codbar3 FROM producto WHERE codbar3 = @codigobarra3",itm)
 
                                             if (id_codbar1 == "" && id_codbar2 == "" && id_codbar3 == "") {
+                                                duplicated = dbr.str(db,"SELECT codigo FROM producto WHERE codigo = @codigo",itm)
+                                                desc_duplicated = dbr.str(db,"SELECT codigo FROM producto WHERE descripcion = @descripcion",itm)
 
                                                 if (desc_duplicated == @@(itm,"codigo") || desc_duplicated == "") {
-                                                    id_marca = dbr.str(db,query8,itm)
-                                                    id_departamento = dbr.str(db,query9,itm)
+                                                    id_marca = dbr.str(db,"SELECT sys_pk FROM marca WHERE codigo = @marca",itm)
+                                                    id_departamento = dbr.str(db,"SELECT sys_pk FROM departamento WHERE codigo = @departamento",itm)
 
                                                     if (id_marca == "") {
                                                         do batch.saveLog(token,"No existe una marca (" + @@(itm,"marca") + ") con ese valor. Se le ha asignado nulo.")
@@ -193,7 +195,7 @@ program
                                                     if (@@(itm,"codigobarra3") == "") { itm<"codigobarra3*">: @null }
 
                                                     if (duplicated != "") {
-                                                        do dbr.execute(db,query14,itm)
+                                                        do dbr.execute(db,query_update,itm)
                                                     } else {
                                                         itm<"sys_guid">: uuid()
                                                         itm<"sys_dtcreated*">: now()
@@ -203,7 +205,7 @@ program
                                                         itm<"uf_sat_proser">: "01010101"
                                                         itm<"uf_sat_uniproser">: "H87"
 
-                                                        do dbr.execute(db,query13,itm)
+                                                        do dbr.execute(db,query_insert,itm)
                                                     }
                                                 } else {
                                                     do batch.saveLog(token,"No se pudo insertar/actualizar el registro. Ya existe un producto con descripción = '" + @@(itm,"descripcion") + "'")

@@ -12,12 +12,12 @@ model "productos y servicios"
         @"sys_lock" int
     }
 
+    entity "cformacomisionproducto" : "EnumModel" {}
 	entity "cclaseproducto" : "EnumModel" {}
 	entity "ctipoproducto" : "EnumModel" {}
 	entity "cmetodosvaluacion" : "EnumModel" {}
-	entity "ctasasiva" : "EnumModel" {}
-    entity "cformacomisionproducto" : "EnumModel" {}
     entity "ctiposcomisionesproducto" : "EnumModel" {}
+	entity "ctasasiva" : "EnumModel" {}
 
 	entity "departamento" : "TableModel"
     {
