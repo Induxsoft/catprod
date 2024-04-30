@@ -5,7 +5,7 @@ module "config.dk"
 	// @STATIC_CONTENT_URL="https://plazamundial.net/_storage/"//{storeid}/{sku}/{image_file}
 	// @PATH_STATIC_CONTENT="/usr/plazamundial/_storage"
 
-    @STATIC_CONTENT_URL = "@_protocol://@_host/images/sku/@_sku/"
+    @STATIC_CONTENT_URL = "@_protocol://@_host:@_port/images/sku/@_sku/"
     @PATH_STATIC_CONTENT = "web/@_host/images/sku/@_sku/"
 
 	@res_fhd=1920

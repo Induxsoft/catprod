@@ -2,6 +2,7 @@
 #!
 module "lib.dk"
 {
+    #include "dbr.vars.dkl"
 	#!
 	api_base_service::
     {
@@ -325,8 +326,9 @@ module "lib.dk"
 
     set_paths::
     {
-        @STATIC_CONTENT_URL = replace_paths(@STATIC_CONTENT_URL)
-        @PATH_STATIC_CONTENT = replace_paths(@PATH_STATIC_CONTENT)
+        ref db = openStoreDB("")
+        @STATIC_CONTENT_URL = replace_paths(dbr.vars.getd(db,"prodserv_static_content_url",@STATIC_CONTENT_URL))
+        @PATH_STATIC_CONTENT = replace_paths(dbr.vars.getd(db,"prodserv_path_static_content",@STATIC_CONTENT_URL))
     }
     replace_paths::path
     {

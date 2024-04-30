@@ -40,5 +40,37 @@
                 }
             }
         ]
+    },
+    {
+        "id": "prodserv",
+        "caption": "Productos y servicios",
+        "help": "Configuración de rutas y URLs",
+        "vars": 
+        [
+            {
+                "varname": "prodserv_static_content_url",
+                "vardefault": "@_protocol://@_host:@_port/images/sku/@_sku/",
+                "varvalue": "@_protocol://@_host:@_port/images/sku/@_sku/",
+                "varcaption": "URL de imagenes",
+                "varhelp": "URL para la obtención de imagenes, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            },
+            {
+                "varname": "prodserv_path_static_content",
+                "vardefault": "web/@_host/images/sku/@_sku/",
+                "varvalue": "web/@_host/images/sku/@_sku/",
+                "varcaption": "Ruta de imagenes",
+                "varhelp": "Ruta para el almacenamiento de imagenes, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            }
+        ]
     }
 ]

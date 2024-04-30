@@ -10,10 +10,10 @@ module "Controller configs"
 	#include "dbr.security.dkl"
 	#include "crudl/crudl.dk"
 
-	if @@(@http_context,"$session/user/ids") == "" {
-		@http_context<"response/headers/location"> : "/"
-		return
-	}
+	// if @@(@http_context,"$session/user/ids") == "" {
+	// 	@http_context<"response/headers/location"> : "/"
+	// 	return
+	// }
 
 	@base_path="prodserv"
 	@path_root="" // Establezca una ruta de ser necesario
@@ -44,6 +44,16 @@ module "Controller configs"
 	{
 		"access":[{"workspace":"'+@ws+'"}]
 	}'
-
+	if @@(@http_context,"$request/get/_program") == "galeria"
+	{
+		host = @@(@http_context, "request/headers/HTTP_HOST")
+		file = path.concat("_config", host + ".json")
+		if file.exists(file)
+		{
+			ref cf = from.json(file.rtext(file))
+			ref db = dbr.open(@@(cf, "qname"))
+			@http_context<"session/idp/database*">: db
+		}
+	}
 	#include "crudl/controller.dkl"
 }
