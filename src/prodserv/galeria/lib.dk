@@ -333,9 +333,17 @@ module "lib.dk"
     replace_paths::path
     {
         ref get = @@(@http_context, "&request/get")
-        _prt = ifstr(parse.bool(@@(@http_context,"request/headers/HTTPS")),"https","http")
-        _hst = @@(@http_context, "request/headers/HTTP_HOST")
-        _por = @@(@http_context, "request/headers/SERVER_PORT")
+        ref hed = @@(@http_context, "&request/headers/")
+
+        if isset("@cross_domain") && not(isnull(@cross_domain))
+        {
+            ref get = @@(@cross_domain, "&get")
+            ref hed = @@(@cross_domain, "&headers")
+        }
+
+        _prt = ifstr(parse.bool(@@(hed,"HTTPS")),"https","http")
+        _hst = @@(hed, "HTTP_HOST")
+        _por = @@(hed, "SERVER_PORT")
         _cnn = @@(get, "_connection")
         _agp = @@(get, "_app_group")
         _etp = @@(get, "_entities_type")

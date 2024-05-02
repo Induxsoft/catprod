@@ -15,6 +15,9 @@ module "index"
 	//#include "magick.lib.dk"
 	//#include "website.dkl"
 
+	//para usar las funciones desde otros sitios
+	@cross_domain = @null
+
 	//do _map_function(@lib_dbr,"induxsoft.Connections.Manager","ResetStorage","reset","void","void")
 	// do cors_xhr()
 	// if @@(@http_context,"request/headers/REQUEST_METHOD")=="OPTIONS"{return}

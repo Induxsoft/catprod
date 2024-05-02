@@ -87,13 +87,25 @@ module "lib"
     openPlazaMundial::
 	{
 		//return dbr.open("connections@induxsoft/plazamundial@plazamundial")
-        return @@(@http_context, "&session/idp/database")
+        return openStoreDB("")
 	}
 
     openStoreDB::pid
 	{
 		//return dbr.open(storeQNameById(pid))
-        return @@(@http_context, "&session/idp/database")
+        ref db = @@(@http_context, "&session/idp/database")
+        if isnull(db)
+        {
+            host = @@(@http_context, "request/headers/HTTP_HOST")
+            file = path.concat("_config", host + ".json")
+            if file.exists(file)
+            {
+                ref cf = from.json(file.rtext(file))
+                ref db = dbr.open(@@(cf, "qname"))
+                //@http_context<"&session/idp/database*">: db
+            }
+        }
+        return db
 	}
 
     closeDB:: &db
