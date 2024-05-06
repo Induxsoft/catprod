@@ -5,6 +5,7 @@ module "list.dk"
     #include "functions.dkh"
     #include "serialize.dkh"
     #include "dbr.dkh"
+    #include "dbr.apps.dkl"
     #include "uielements.v12.dkl"
     #include "../config.dk"
     #include "../_lib/icons.dk"
@@ -23,44 +24,20 @@ module "list.dk"
         {
             member @"codigo" { @"caption":"Código" }
             member @"descripcion" { @"caption":"Descripción" }
-            member @"_actions" 
-            { 
-                @"caption":"Acciones" 
-                @"template":ftext('
-                    <div style="display:flex;gap:8px;justify-content:center;" class="no-print">
-                        <a href="#<@PRODSERV_LINEA>${DataRow.sys_pk}/" style="cursor:pointer; text-decoration: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Editar</a>
-                        <button onclick="InduxsoftCrudlModel.Delete(${DataRow.sys_pk})" style="cursor:pointer; border: none; outline: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Eliminar</button>
-                    </div>')
-                @"no-print":@true
-            }
         }
     }
-
-    header_act::
-    {
-        jg = dbr.num(@("&database"),"SELECT sys_pk FROM jobsgroup WHERE name = 'PRODSERV'",@null)
-
-        #! if AppExist(@("&database"),"batch") {
-            #$
-            a(href="#<@BATCH_TASKMAN>#<jg>/importar.linea?exit_url_encode=#<url_encode(@PRODSERV_LINEA)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar lineas") {
-                $"#<@ICON_FILE_CSV>"
-            }
-        }
-
-        #$
-        a(href="#<@PRODSERV_LINEA>_new/" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
-    }
-
-    #! point general_act to header_act
 
     new nav_config
     {
         @"title": "Línea de productos"
-        @"buttons*": general_act
+        @"buttons*": @null
         @"urlexit": "/"
+        @"actions*": dbr.apps.itemactions(@('&database'),"DET02A","action","",0)
+        @"reports*": dbr.apps.itemactions(@('&database'),"DET02A","report","",0)
+        @"jscurrentcontext": "getCurrentContext"
     }
 
-    #$ div(class="container-fluid p-0")
+    #$ div(class="container p-0")
     {
         #! do uie.printV12FormBar(nav_config)
 
@@ -82,5 +59,16 @@ module "list.dk"
             }
             #! do uie.dbeditable(table_definition, "tbl_linea_prods")
         }
+
+        #$
+		script(type="text/javascript")
+		{$'
+			function getCurrentContext()
+			{
+				const table = document.getElementById("tbl_linea_prods");
+				const id = (table?.DataArray[table.CurrentRowIndex()]?.sys_pk ?? "");
+    			return { item_id:id, context: {} }
+			}
+		'}
     }
 }

@@ -5,6 +5,7 @@ module "list.dk"
     #include "functions.dkh"
     #include "serialize.dkh"
     #include "dbr.dkh"
+    #include "dbr.apps.dkl"
     #include "uielements.v12.dkl"
     #include "../config.dk"
     #include "../_lib/icons.dk"
@@ -23,49 +24,70 @@ module "list.dk"
         {
             member @"codigo" { @"caption":"Código" }
             member @"descripcion" { @"caption":"Descripción" }
-            member @"marca" { @"caption":"Marca" }
-            member @"unidad" { @"caption":"Unidad" }
-            member @"existencia" { @"caption":"Existencia" }
-            member @"saldo" { @"caption":"Saldo" }
-            member @"costoultimo" { @"caption":"Costo último" }
-            member @"clase" { @"caption":"Clase" }
-            member @"divisa" { @"caption":"Divisa" }
+            member @"marca"
+            {
+                @"caption":"Marca"
+                @"align": "center"
+            }
+            member @"unidad"
+            {
+                @"caption":"Unidad"
+                @"align": "center"
+            }
+            member @"existencia"
+            {
+                @"caption":"Existencia"
+                @"align": "center"
+                @"format": @true
+                @"thousandssep": @true
+            }
+            member @"saldo"
+            {
+                @"caption":"Saldo"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": 4
+            }
+            member @"costoultimo"
+            {
+                @"caption":"Costo último"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": 4
+            }
+            member @"clase"
+            {
+                @"caption":"Clase"
+                @"align": "center"
+            }
+            member @"divisa"
+            {
+                @"caption":"Divisa"
+                @"align": "center"
+            }
             member @"_actions" 
-            { 
-                @"caption":"Acciones" 
+            {
+                @"caption":"Acciones"
+                @"align": "center"
+                @"no-print":@true
                 @"template":ftext('
                     <div style="display:flex;gap:8px;justify-content:center;" class="no-print">
                         <a href="${`#<@PRODSERV_GALERIA>`.replace(`@id`,DataRow.sys_pk)}" style="cursor:pointer; text-decoration: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Galería</a>
-                        <a href="${`#<@PRODSERV_ADD_EDIT_PRODUCTO>`.replace(`@id`,DataRow.sys_pk)}" style="cursor:pointer; text-decoration: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Editar</a>
-                        <button onclick="InduxsoftCrudlModel.Delete(${DataRow.sys_pk})" style="cursor:pointer; border: none; outline: none; padding: 0px 8px; background-color: #F5F5F5; color: #000;">Eliminar</button>
                     </div>')
-                @"no-print":@true
             }
         }
     }
-
-    header_act::
-    {
-        jg = dbr.num(@("&database"),"SELECT sys_pk FROM jobsgroup WHERE name = 'PRODSERV'",@null)
-
-        #! if AppExist(@("&database"),"batch") {
-            #$
-            a(href="#<@BATCH_TASKMAN>#<jg>/importar.producto?exit_url_encode=#<url_encode(@PRODSERV_PRODUCTO)>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print" title="Importar productos") {
-                $"#<@ICON_FILE_CSV>"
-            }
-        }
-
-        #$
-        a(href="#<replace(@PRODSERV_ADD_EDIT_PRODUCTO, '@id', '_new')>" class="btn btn-sm border-secondary induxsoft-corners btn-main-action no-print"){$"Agregar"}
-    }
-
-    #! point general_act to header_act
 
     new nav_config
     {
         @"title": "Productos y servicios"
-        @"buttons*": general_act
+        @"buttons*": @null
         @"urlexit": "/"
+        @"actions*": dbr.apps.itemactions(@('&database'),"DET03E","action","",0)
+        @"reports*": dbr.apps.itemactions(@('&database'),"DET03E","report","",0)
+        @"jscurrentcontext": "getCurrentContext"
     }
     
     #$ div(class="container-fluid p-0")
@@ -88,7 +110,18 @@ module "list.dk"
                     "class"="w-100"
                 ){$""}
             }
-            #! do uie.dbeditable(table_definition, "tbl_clientes")
+            #! do uie.dbeditable(table_definition, "tbl_prodserv")
         }
+
+        #$
+		script(type="text/javascript")
+		{$'
+			function getCurrentContext()
+			{
+				const table = document.getElementById("tbl_prodserv");
+				const id = (table?.DataArray[table.CurrentRowIndex()]?.sys_pk ?? "");
+    			return { item_id:id, context: {} }
+			}
+		'}
     }
 }
