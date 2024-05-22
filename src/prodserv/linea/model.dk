@@ -37,17 +37,28 @@ module "model"
 
     function create(&db, &params, &data)
     {
-        if not(dbr.security.isauth(db,@AUT_CREATE_LINEA)) { do rise_error(500,"No autorizado") }
+        @use_transaction = @false
+        // if not(dbr.security.isauth(db,@AUT_CREATE_LINEA)) { do rise_error(500,"No autorizado") }
+
+        do dbr.apps.action.pre("CF21")
+        do dbr.begin(db)
 
         data<"clase">: 4
         data<"color">: 0
 
         if @@(data,"codigo")=="" { do check_autocode(db,"linea","codigo",data) }
-        do entity.create(db, params, data)
+
+        ref entity = entity.create(db, params, data)
+        
+        do dbr.apps.action.pos(entity)
+        do dbr.commit(db)
+        do dbr.apps.action.ext(entity)
 
         exception
 		{
+            if dbr.in_transaction(db){ do dbr.rollback(db) }
 			do cu_error("línea")
+            do dbr.apps.action.log()
 			do rise_error(last_error_code(), last_error())
 		}
     }

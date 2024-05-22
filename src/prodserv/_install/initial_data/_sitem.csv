@@ -1,0 +1,13 @@
+itemid,description,itemparent
+"FX1-00-00-000","Operaciones ERP","FX1-00-00-000"
+"FX1-10-00-000","Catálogos","FX1-00-00-000"
+"FX1-10-240-000","Productos","FX1-10-00-000"
+"FX1-10-240-001","Solo lectura","FX1-10-240-000"
+"FX1-10-240-002","Permitir Agregar Productos","FX1-10-240-000"
+"FX1-10-240-003","Permitir Modificar Productos","FX1-10-240-000"
+"FX1-10-240-004","Permitir Eliminar Productos","FX1-10-240-000"
+"FX1-10-200-000","Lineas de productos","FX1-10-00-000"
+"FX1-10-200-001","Solo lectura","FX1-10-200-000"
+"FX1-10-200-002","Permitir Agregar Lineas","FX1-10-200-000"
+"FX1-10-200-003","Permitir Modificar Lineas","FX1-10-200-000"
+"FX1-10-200-004","Permitir Eliminar Lineas","FX1-10-200-000"
