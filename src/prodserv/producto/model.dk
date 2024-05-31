@@ -29,9 +29,7 @@ module "model"
 
     function prodserv.crearProducto(&db, &params, &data)
     {
-        if @@(params,"$_entity_id") == "_new" && not(dbr.security.isauth(db,@AUT_CREATE_PRODUCTO)) { do rise_error(500,"No autorizado") }
-        if @@(params,"$_entity_id") != "_new" && not(dbr.security.isauth(db,@AUT_UPDATE_PRODUCTO)) { do rise_error(500,"No autorizado") }
-
+     
         @table_name = "producto"
         if field.exist(data,"codbar1") && trim(@@(data,"$codbar1")) == "" { data<"codbar1*"> : @null }
         if field.exist(data,"codbar2") && trim(@@(data,"$codbar2")) == "" { data<"codbar2*"> : @null }
@@ -90,9 +88,48 @@ module "model"
             do prodserv.prepareView(db, params, data)
 		}
     }
+	// crear 
+	function prodserv.crear(&db, &params, &data)
+	{
+	    @use_transaction = @false
+		do dbr.apps.action.pre("CF11")
+		do dbr.begin(db)
+		ref res= prodserv.crearProducto(db,params,data)
+		do dbr.apps.action.pos(res)
+		do dbr.commit(db)
+		do dbr.apps.action.ext(res)
+		exception
+		{
+			do errordet(@false)
+			if dbr.in_transaction(db){ do dbr.rollback(db) }
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
+	}
+	//Actualizar
+	function prodserv.actualizar(&db, &params, &data)
+	{
+	 @use_transaction = @false
+		do dbr.apps.action.pre("CF12")
+		do dbr.begin(db)
+		ref res= prodserv.crearProducto(db,params,data)
+		do dbr.apps.action.pos(res)
+		do dbr.commit(db)
+		do dbr.apps.action.ext(res)
+		exception
+		{
+			do errordet(@false)
+			if dbr.in_transaction(db){ do dbr.rollback(db) }
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
+	}
+	
     function prodserv.read(&db, &params)
     {
-        if not(dbr.security.isauth(db,@AUT_READ_PRODUCTO)) { do rise_error(500,"No autorizado") }
+       // if not(dbr.security.isauth(db,@AUT_READ_PRODUCTO)) { do rise_error(500,"No autorizado") }
+	   
+		do dbr.apps.action.grant("CF10")
 
         sql_producto = "
             SELECT 
@@ -125,6 +162,12 @@ module "model"
         do prodserv.prepareView(db, params, data)
 
         return data
+		exception
+		{
+			do errordet(@false)
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
     }
     function prodserv.obtenerDivisas(&db, &params)
     {
@@ -166,8 +209,8 @@ module "model"
 
     function prodserv.list(&db, &params)
     {
-        if not(dbr.security.isauth(db,@AUT_ACCESS_PRODUCTO)) { do rise_error(500,"No autorizado") }
-
+        //if not(dbr.security.isauth(db,@AUT_ACCESS_PRODUCTO)) { do rise_error(500,"No autorizado") }
+		do dbr.apps.action.grant("CF10")
         query = "
             SELECT p.sys_pk, p.codigo, p.descripcion, IFNULL(m.descripcion,'') marca, p.unidad, IFNULL(p.existencia,0) existencia,
                 IFNULL(p.saldo,0) saldo, IFNULL(p.costoultimo,0) costoultimo, REPLACE(SUBSTR(IFNULL(cc.const,''),2),'_',' ') clase,
@@ -183,13 +226,33 @@ module "model"
             LIMIT #<@default_max_rows>;
         "
         return dbr.list(db, ftext(query), params)
+		exception
+		{
+			do errordet(@false)
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
+
     }
     function prodserv.delete(&db, &params)
     {
-        if not(dbr.security.isauth(db,@AUT_DELETE_PRODUCTO)) { do rise_error(500,"No autorizado") }
-
+        //if not(dbr.security.isauth(db,@AUT_DELETE_PRODUCTO)) { do rise_error(500,"No autorizado") }
+		@use_transaction = @false
+		do dbr.apps.action.pre("CF13")
+		do dbr.begin(db)
         do dbr.execute(db, "DELETE FROM grupoproductos_producto_ WHERE iproductos=@_entity_id", params)
-        do entity.delete(db, params)
+        ref res = entity.delete(db, params)
+		do dbr.apps.action.pos(res)
+		do dbr.commit(db)
+		do dbr.apps.action.ext(res)
+		return res
+		exception
+		{
+			do errordet(@false)
+			if dbr.in_transaction(db){ do dbr.rollback(db) }
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
     }
 
     function cu_error(table)
@@ -206,11 +269,18 @@ module "model"
 
     function prodserv.blank(&db, &params)
     {
-        if not(dbr.security.isauth(db,@AUT_READ_PRODUCTO)) { do rise_error(500,"No autorizado") }
-
+        //if not(dbr.security.isauth(db,@AUT_READ_PRODUCTO)) { do rise_error(500,"No autorizado") }
+		
+		do dbr.apps.action.grant("CF10")
         ref data = record.create()
         do prodserv.prepareView(db, params, data)
         return data
+		exception
+		{
+			do errordet(@false)
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
     }
     function prodserv.prepareView(&db, &params, &data)
     {
@@ -279,8 +349,8 @@ module "model"
         return (url + "?ids=" + @@(@http_context, "session/user/ids"))
     }
 
-    point @create to prodserv.crearProducto
-    point @update to prodserv.crearProducto
+    point @create to prodserv.crear
+    point @update to prodserv.actualizar
     point @delete to prodserv.delete
     point @read to prodserv.read
     point @list to prodserv.list

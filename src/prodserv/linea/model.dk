@@ -20,7 +20,8 @@ module "model"
 
     function list(&db, &params)
     {
-        if not(dbr.security.isauth(db,@AUT_ACCESS_LINEA)) { do rise_error(500,"No autorizado") }
+        //if not(dbr.security.isauth(db,@AUT_ACCESS_LINEA)) { do rise_error(500,"No autorizado") }
+			do dbr.apps.action.grant("CF20")
 
         query="
             SELECT sys_pk, clase, codigo, descripcion,
@@ -33,6 +34,12 @@ module "model"
             ORDER BY codigo
             LIMIT #<@default_max_rows>;"
         return dbr.list(db, ftext(query), params)
+		exception
+		{
+			do errordet(@false)
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
     }
 
     function create(&db, &params, &data)
@@ -65,38 +72,45 @@ module "model"
 
     function update(&db, &params, &data)
     {
-        if not(dbr.security.isauth(db,@AUT_UPDATE_LINEA)) { do rise_error(500,"No autorizado") }
-
-        do entity.update(db, params, data)
-        exception
+        //if not(dbr.security.isauth(db,@AUT_UPDATE_LINEA)) { do rise_error(500,"No autorizado") }
+		@use_transaction = @false
+		do dbr.apps.action.pre("CF22")
+		do dbr.begin(db)
+        ref res= entity.update(db, params, data)
+		do dbr.apps.action.pos(res)
+		do dbr.commit(db)
+		do dbr.apps.action.ext(res)
+		return res
+		exception
 		{
-			do cu_error("línea")
-			do rise_error(last_error_code(), last_error())
+			do errordet(@false)
+			if dbr.in_transaction(db){ do dbr.rollback(db) }
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
 		}
+
     }
 
     function delete(&db, &params)
     {
-        if not(dbr.security.isauth(db,@AUT_DELETE_LINEA)) { do rise_error(500,"No autorizado") }
+       // if not(dbr.security.isauth(db,@AUT_DELETE_LINEA)) { do rise_error(500,"No autorizado") }
         // intentar borrado físico
-        do entity.delete(db, params)
+		@use_transaction = @false
+		do dbr.apps.action.pre("CF23")
+		do dbr.begin(db)
+        ref res= entity.delete(db, params)
+        do dbr.apps.action.pos(res)
+		do dbr.commit(db)
+		do dbr.apps.action.ext(res)
+		return res
+		exception
+		{
+			do errordet(@false)
+			if dbr.in_transaction(db){ do dbr.rollback(db) }
+			do dbr.apps.action.log()
+			do rise_error(last_error_code(),last_error())
+		}
         
-        exception
-        {
-            if not(dbr.security.isauth(db,@AUT_DELETE_LINEA)) { do rise_error(500,"No autorizado") }
-            
-            // borrado lógico
-            sql = "
-                UPDATE linea SET 
-                    sys_deleted = 1, 
-                    codigo = SUBSTRING(CONCAT('~',sys_pk),1,15), 
-                    descripcion = SUBSTRING(CONCAT('~',sys_pk,descripcion),1,50)
-                WHERE sys_pk=@_entity_id;
-            "
-            do dbr.execute(db, sql, params)
-        }
-
-        return @true
     }
 
     function cu_error(table)
