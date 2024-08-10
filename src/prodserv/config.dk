@@ -7,6 +7,8 @@ module "config"
     @JS_PRODUCTO = "/$/prodserv/js/producto.js"
     @JS_GALERIA = "/$/prodserv/js/galeria.js"
     @JS_LINEA = "/$/prodserv/js/linea.js"
+    
+    @CSS_MAIN = "/$/prodserv/css/main.css"
     @CSS_GALERIA = "/$/prodserv/css/galeria.css"
 
     // _PACKAGE
@@ -22,6 +24,7 @@ module "config"
     @PRODSERV_SEARCH_DEPARTAMENTO  = "/!/prodserv/productos/?_view=departamento&s=@search"
     @PRODSERV_SEARCH_MARCA  = "/!/prodserv/productos/?_view=marca&s=@search"
     @PRODSERV_SEARCH_PROVEEDOR  = "/!/prodserv/productos/?_view=proveedor&s=@search"
+    @PRODSERV_SEARCH_PRODUCTO = "/!/prodserv/productos/?s=@search"
 
     @URL_IMAGES = "/!/prodserv/galeria/@sku/"
     @URL_IMAGE = "/!/prodserv/galeria/@sku/@image_id/"
@@ -30,6 +33,10 @@ module "config"
     @CATBAS_MAS_PRECIOS_PATH = "catbas/mas_precios/"
 
     @default_max_rows=250
+
+    @clsServicio = 3
+    @clsArticulo = 4
+    @clsEnsamble = 5
 
     // Upload images
 	@img_max_size = 1048576 * 5 // 10MB to Bytes

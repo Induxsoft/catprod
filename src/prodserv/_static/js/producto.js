@@ -3,9 +3,14 @@ var producto =
     urlFormActn:'', urlBack:'', formcomi:[],
     urlMasPrecios:'', exist_mp_app: false,
     currentProducto: '', curr_url:'',
+    iclase_selected: 4, ff:[],
+    tbl_ensamble:null, arr_ensamble:[],
 
     init()
     {
+        const form_cntnr = document.querySelector('#form');
+        this.ff = form_cntnr.elements;
+
         const check_req_n = document.querySelector('#check_req_ns');
         const check_req_l = document.querySelector('#check_req_lt');
         const ipt_reqsrie = document.querySelector('#ipt_reqserie');
@@ -20,9 +25,8 @@ var producto =
         const ipt_complem = document.querySelector('#ipt_complemento');
         const ipt_unidad = document.querySelector('input[name="unidad"]');
         const ipt_factorb = document.querySelector('input[name="factorb"]');
-        const ipt_unidadb = document.querySelector('input[name="unidadB"]');
+        const ipt_unidadb = document.querySelector('input[name="unidadb"]');
         const msg_factor = document.querySelector('#mesage_factor');
-        const form_cntnr = document.querySelector('#form');
         const select_clase = document.querySelector('select[name="iclase"]');
         const formacomision = document.querySelector('select[name="formacomision"]');
         const tipocomision = document.querySelector('select[name="tipocomision"]');
@@ -46,16 +50,49 @@ var producto =
         if (ipt_unidad && ipt_factorb && ipt_unidadb && msg_factor)
         {
             ipt_unidad.addEventListener('keyup', e => { this.valide_factor(ipt_unidad,ipt_factorb,ipt_unidadb,msg_factor) });
+            ipt_unidad.addEventListener('input', e => { if (select_clase.value=='3') ipt_unidadb.value = ipt_unidad.value });
             ipt_unidadb.addEventListener('keyup', e => { this.valide_factor(ipt_unidad,ipt_factorb,ipt_unidadb,msg_factor) });
             ipt_factorb.addEventListener('change', e => { this.valide_factor(ipt_unidad,ipt_factorb,ipt_unidadb,msg_factor) });
             ipt_factorb.addEventListener('keyup', e => { this.valide_factor(ipt_unidad,ipt_factorb,ipt_unidadb,msg_factor) });
         }
 
         if (btn_more_prices) btn_more_prices.addEventListener('click', () => this.showMorePrices());
+
+        this.setTableEnsambleEvents();
     },
+
+    setTableEnsambleEvents()
+    {
+        let table = document.querySelector('#tbl_ensamble');
+        let array = (table?.DataArray ?? []);
+        const events = table.EdiTable.Const.Events;
+        ensamble.table = table;
+        ensamble.array = array;
+        
+        const ik_producto = document.getElementById("ik_producto");
+        const btn_agregar = document.getElementById("btn_add_row");
+        const btn_remover = document.getElementById("btn_del_row");
+
+        table.setInputKey("codigo",ik_producto);
+        table.setInputKey("descripcion",ik_producto);
+
+        btn_add_row.addEventListener("click", () => ik_producto.searchText("",false));
+        btn_del_row.addEventListener("click", () => table.DeleteCurrentRow());
+        ik_producto.change_event = (data) => ensamble.agregar(data);
+
+        table.Events[events.BeforeUpdateCell] = (e) => ensamble.BeforeUpdateCell(e);
+        table.Events[events.ConfirmEdition] = (e) => ensamble.ConfirmEdition(e);
+    },
+
     set_ipt_check_value(inputElement, checkElement)
     {
-        inputElement.value = (checkElement.checked ? 1 : 0);
+        let checked = (checkElement.checked ? 1 : 0);
+        inputElement.value = checked;
+
+        if (checkElement.id === "check_flaglimites") {
+            const div_limites = document.getElementById("div_precios_lim");
+            div_limites.classList.toggle("d-none",!checked);
+        }
     },
     create_update_product(event)
     {
@@ -87,6 +124,8 @@ var producto =
     },
     valide_factor(unit1,factor,unit2,msg)
     {
+        if (this.iclase_selected == 3) return;
+
         if (Number(factor.value) < 1) {
             msg.textContent = 'El factor debe ser mayor a 0';
             return;
@@ -112,7 +151,27 @@ var producto =
     },
     select_class_changed(selectClass)
     {
-        const disable = (selectClass.value == '3');
+        const ipt_unidad = document.querySelector('input[name="unidad"]');
+        const ipt_unidadb = document.querySelector('input[name="unidadb"]');
+
+        this.iclase_selected = Number(selectClass.value);
+        let disable = false;
+        
+        if (selectClass.value == '3') {
+            const ipt_factorb = document.querySelector('input[name="factorb"]');
+            const msg_factor = document.querySelector('#mesage_factor');
+
+            ipt_unidad.value = "SERVICIO";
+            ipt_factorb.value = 1;
+            ipt_unidadb.value = "SERVICIO";
+            msg_factor.textContent = "";
+            disable = true;
+        }
+        else {
+            ipt_unidad.value = "PZA";
+            ipt_unidadb.value = "PZA";
+            disable = false;
+        }
 
         const select_tipo = document.querySelector('select[name="itipo"]');
         const elem_unidad = document.querySelectorAll('.elem-unidad');
@@ -191,7 +250,7 @@ var producto =
         let precio = Number(ipt_costoultimo.value);
         let percent = Math.mul(precio,Math.div(utilidad, 100));
 
-        let ipt_prices = document.querySelectorAll('.precio-util');
+        let ipt_prices = document.querySelectorAll('.precio-sin');
         
         ipt_prices.forEach(ipt =>{
             ipt.value = Math.add(precio, percent);
@@ -204,6 +263,108 @@ var producto =
             return;
         }
         window.location.href = this.urlMasPrecios + this.currentProducto + '/?exit='+this.curr_url;
+    },
+}
+
+var ensamble =
+{
+    table:null, array:[], _obj:{},
+
+    filterData(){ return (this.table?.DataArray??[]).filter(row => { return Object.keys(row??{}).length >= (this.table?.Columns??[]).length }) },
+
+    agregar(data)
+    {
+        if (!data) return;
+
+        let index = this.table.CurrentRowIndex();
+        let ensambles = this.filterData();
+        let available_row = (ensambles.length > 0) ? ensambles.length : 0;
+        
+        let datarow =
+        {
+            sys_pk:0,
+            sys_recver:0,
+            elemento: data.sys_pk,
+            codigo: data.codigo,
+            descripcion: data.descripcion,
+            unidad: data.unidad,
+            cantidad: 1,
+            costoultimo: data.costoultimo,
+            importe: data.costoultimo,
+            representacion: 100
+        }
+
+        if (this.array.length === ensambles.length) this.table.AddRow();
+        
+        this.array[available_row] = datarow;
+        // this.table.UpdateRow(available_row);
+        this.calculateAmounts();
+    },
+
+    BeforeUpdateCell(e)
+    {
+        let field = e.coldef.field;
+        let index = e.sender.RowIndexOfTd(e.td);
+        // Crear backup de la fila en edición
+        this._obj = JSON.parse(JSON.stringify(this.array[index]??{}));
+    },
+
+    async ConfirmEdition(e)
+    {
+        let field = e.coldef.field;
+        let index = e.sender.RowIndexOfTd(e.td);
+        let dprod = this.array[index] ?? {};
+
+        if (Object.keys(dprod).length < this.table.Columns.length) return;
+
+        const isValid = await this.validateFields(e);
+        if (isValid) this.calculateAmounts();
+    },
+
+    validateFields(e)
+    {
+        return new Promise(resolve => {
+            if (e.coldef.field !== "cantidad") {
+                resolve(false);
+                return
+            }
+
+            let index = e.sender.RowIndexOfTd(e.td);
+            let dprod = this.array[index];
+            let isValid = true;
+            let cantidad = Number(e.text);
+        
+            if (cantidad < 0) {
+                alert("La cantidad ingresada no puede ser menor que 0");
+                cantidad = Number(this._obj.cantidad);
+                isValid = false;
+            }
+
+            dprod["cantidad"] = cantidad;
+            e.text = cantidad;
+
+            this.table.UpdateRow(index);
+            resolve(isValid);
+        });
+    },
+
+    calculateAmounts()
+    {
+        console.log("Calculando...");
+
+        let t_cantidad = this.array.reduce((total,obj) => Math.add(total,Number(obj.cantidad??0)), 0);
+        let c_materiales = 0;
+        this.array.forEach((prod,index) => {
+            if (prod.elemento != undefined) {
+                prod['representacion'] = Math.mul(Math.div(Number(prod.cantidad??0),t_cantidad),100);
+                prod['importe'] = Math.mul(Number(prod.cantidad??0),Number(prod.costoultimo??0));
+                c_materiales = Math.add(c_materiales,Number(prod.importe));
+                this.table.UpdateRow(index);
+            }
+        });
+        
+        producto.ff["cdirecto"].value = Math.RoundTo(c_materiales,8);
+        producto.ff["_ensamble"].value = JSON.stringify(this.filterData());
     },
 }
 

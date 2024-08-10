@@ -9,6 +9,24 @@ module "model"
 
     @table_name = "producto"
 
+    @_ensamble_query = "
+    SELECT
+        ie.sys_pk,
+        ie.sys_recver,
+        ie.elemento,
+        pe.codigo,
+        pe.descripcion,
+        pe.unidad,
+        IFNULL(ie.cantidad,0) cantidad,
+        IFNULL(pe.costoultimo,0) costoultimo, 
+        IFNULL(pe.costoultimo,0) importe,
+        100 AS representacion
+    FROM iensamble ie
+        INNER JOIN producto pe ON ie.elemento = pe.sys_pk
+        INNER JOIN producto p ON ie.fk_producto_elementos = p.sys_pk
+    WHERE p.sys_pk = IFNULL(@sys_pk,@_entity_id);
+    "
+
     function check_autocode(&db,table,field,&data)
     {
         linea = @@(data, "ilinea")
@@ -34,6 +52,7 @@ module "model"
         if field.exist(data,"codbar1") && trim(@@(data,"$codbar1")) == "" { data<"codbar1*"> : @null }
         if field.exist(data,"codbar2") && trim(@@(data,"$codbar2")) == "" { data<"codbar2*"> : @null }
         if field.exist(data,"codbar3") && trim(@@(data,"$codbar3")) == "" { data<"codbar3*"> : @null }
+        if @@(data,"#iclase") == 3 { data<"unidadb"> : @@(data,"$unidad") }
         if field.exist(data,"idepartamento") && trim(@@(data,"$idepartamento")) == "" { data<"idepartamento*">:@null }
         if field.exist(data,"imarca") && trim(@@(data,"$imarca")) == "" { data<"imarca*">:@null }
         if field.exist(data,"proveedor1") && trim(@@(data,"$proveedor1")) == "" { data<"proveedor1*">:@null }
@@ -47,6 +66,27 @@ module "model"
         do field.remove(data, "similar_group")
 
         if @@(data,"codigo")=="" { do check_autocode(db,"producto","codigo",data) }
+
+        if @@(data,"#iclase") != @clsEnsamble { do field.remove(data,"_ensamble") }
+        else
+        {
+            _ensamble = trim(field.dstr(data,"_ensamble","[]"))
+            if _ensamble == "" { _ensamble = "[]" }
+            data<"_ensamble*"> : from.json(_ensamble)
+
+            using @childs
+            {
+                member "_ensamble"
+                {
+                    @"joinfield": "fk_producto_elementos"
+                    @"keyfield": "sys_pk"
+                    @"table": "iensamble"
+                    @"select_query": "select 1 AS success;"
+                    @"fields": "sys_pk,sys_recver,cantidad,elemento"
+                }
+            }
+        }
+
         ref res = entity.create(db, params, data)
 
         if trim(group) != ""
@@ -132,31 +172,42 @@ module "model"
 		do dbr.apps.action.grant("CF10")
 
         sql_producto = "
-            SELECT 
-                IFNULL(p.idivisa,'') idivisa, IFNULL(p.ilinea,'') ilinea, IFNULL(p.idepartamento,'') idepartamento, IFNULL(p.imarca,'') imarca,
-                IFNULL(p.proveedor1,'') proveedor1, IFNULL(p.proveedor2,'') proveedor2, IFNULL(p.proveedor3,'') proveedor3,
-                p.sys_pk, p.sys_recver, p.iclase, p.codigo, p.descripcion, p.itipo, p.unidad, IFNULL(p.factorb,1) factorb, IFNULL(p.unidadB,'') unidadB,
-                p.metodovaluacion, p.impuestos, IFNULL(p.costoultimo,0) costoultimo, IFNULL(p.codbar1,'') codbar1, IFNULL(p.codbar2,'') codbar2,
-                IFNULL(p.codbar3,'') codbar3, IFNULL(p.reqserie,0) reqserie, IFNULL(p.reqlote,0) reqlote, IFNULL(p.unidadc,'') unidadc,
-                IFNULL(p.factorc,0) factorc, IFNULL(p.unidadd,'') unidadd, IFNULL(p.factord,0) factord, IFNULL(p.unidade,'') unidade,
-                IFNULL(p.factore,0) factore, IFNULL(p.maximo,0) maximo, IFNULL(p.puntoro,0) puntoro, IFNULL(p.minimo,0) minimo,
-                IFNULL(p.diasentrega,0) diasentrega, IFNULL(p.notas,'') notas, IFNULL(p.uf_sat_proser,'01010101') uf_sat_proser,
-                IFNULL(p.uf_sat_uniproser,'H87') uf_sat_uniproser, IFNULL(p.utilmin,0) utilmin, IFNULL(p.tipocomision,'') tipocomision,
-                IFNULL(p.formacomision,'') formacomision, IFNULL(p.comision,0) comision, IFNULL(p.ppuntos,0) ppuntos,
-                IFNULL(p.precio1,0) precio1, IFNULL(p.precio2,0) precio2, IFNULL(p.precio3,0) precio3, IFNULL(p.precio4,0) precio4, IFNULL(p.precio5,0) precio5,
-                IFNULL(p.visible,0) visible, IFNULL(p.uf_complemento,0) uf_complemento,
-                IFNULL(p.flagutilidad,0) flagutilidad, IFNULL(p.flaglimites,0) flaglimites,
-                IFNULL(p.comision1,0) comision1, IFNULL(p.comision2,0) comision2, IFNULL(p.comision3,0) comision3, IFNULL(p.comision4,0) comision4, IFNULL(p.comision5,0) comision5,
-                IFNULL(gp.sys_pk,'') similar_group
-            FROM producto p
-                LEFT JOIN grupoproductos_producto_ gp_p ON gp_p.iproductos = p.sys_pk
-                LEFT JOIN grupoproductos gp ON gp.sys_pk = gp_p.igrupos
-            WHERE p.sys_pk=@_entity_id LIMIT 1;
+        SELECT 
+            p.sys_pk, p.sys_recver, p.codigo, p.descripcion, p.iclase, p.itipo, p.unidad, IFNULL(p.costoultimo,0) costoultimo,
+            IFNULL(p.idivisa,'') idivisa, IFNULL(p.ilinea,'') ilinea, IFNULL(p.idepartamento,'') idepartamento, IFNULL(p.imarca,'') imarca,
+            IFNULL(p.proveedor1,'') proveedor1, IFNULL(p.proveedor2,'') proveedor2, IFNULL(p.proveedor3,'') proveedor3,
+            IFNULL(p.factorb,1) factorb, IFNULL(p.unidadb,'') unidadb,
+            p.metodovaluacion, p.impuestos, IFNULL(p.codbar1,'') codbar1, IFNULL(p.codbar2,'') codbar2,
+            IFNULL(p.codbar3,'') codbar3, IFNULL(p.reqserie,0) reqserie, IFNULL(p.reqlote,0) reqlote, IFNULL(p.unidadc,'') unidadc,
+            IFNULL(p.factorc,0) factorc, IFNULL(p.unidadd,'') unidadd, IFNULL(p.factord,0) factord, IFNULL(p.unidade,'') unidade,
+            IFNULL(p.factore,0) factore, IFNULL(p.maximo,0) maximo, IFNULL(p.puntoro,0) puntoro, IFNULL(p.minimo,0) minimo,
+            IFNULL(p.diasentrega,0) diasentrega, IFNULL(p.notas,'') notas, IFNULL(p.uf_sat_proser,'01010101') uf_sat_proser,
+            IFNULL(p.uf_sat_uniproser,'H87') uf_sat_uniproser, IFNULL(p.utilmin,0) utilmin, IFNULL(p.tipocomision,'') tipocomision,
+            IFNULL(p.formacomision,'') formacomision, IFNULL(p.comision,0) comision, IFNULL(p.ppuntos,0) ppuntos,
+            IFNULL(p.precio1,0) precio1, IFNULL(p.precio2,0) precio2, IFNULL(p.precio3,0) precio3, IFNULL(p.precio4,0) precio4, IFNULL(p.precio5,0) precio5,
+            IFNULL(p.util1,0) util1, IFNULL(p.util2,0) util2, IFNULL(p.util3,0) util3, IFNULL(p.util4,0) util4, IFNULL(p.util5,0) util5,
+            IFNULL(p.desc2,0) desc2, IFNULL(p.desc3,0) desc3, IFNULL(p.desc4,0) desc4, IFNULL(p.desc5,0) desc5,
+            IFNULL(p.lim2,0) lim2, IFNULL(p.lim3,0) lim3, IFNULL(p.lim4,0) lim4, IFNULL(p.lim5,0) lim5,
+            IFNULL(p.comision1,0) comision1, IFNULL(p.comision2,0) comision2, IFNULL(p.comision3,0) comision3, IFNULL(p.comision4,0) comision4, IFNULL(p.comision5,0) comision5,
+            IFNULL(p.visible,0) visible, IFNULL(p.uf_complemento,0) uf_complemento,
+            IFNULL(p.flagutilidad,0) flagutilidad, IFNULL(p.flaglimites,0) flaglimites,
+            IFNULL(gp.sys_pk,'') similar_group
+        FROM producto p
+            LEFT JOIN grupoproductos_producto_ gp_p ON gp_p.iproductos = p.sys_pk
+            LEFT JOIN grupoproductos gp ON gp.sys_pk = gp_p.igrupos
+        WHERE p.sys_pk=@_entity_id LIMIT 1;
         "
 
+        ref producto = dbr.rec(db, sql_producto, params)
+        ref ensamble = @null
+
+        if @@(producto,"#iclase") == @clsEnsamble { ref ensamble:dbr.list(db,@_ensamble_query,params) }
+        
         new data
         {
-            @"producto*": dbr.rec(db, sql_producto, params)
+            @"producto*": producto
+            @"ensamble*": ensamble
+
         }
 
         do prodserv.prepareView(db, params, data)
@@ -212,18 +263,27 @@ module "model"
         //if not(dbr.security.isauth(db,@AUT_ACCESS_PRODUCTO)) { do rise_error(500,"No autorizado") }
 		do dbr.apps.action.grant("CF10")
         query = "
-            SELECT p.sys_pk, p.codigo, p.descripcion, IFNULL(m.descripcion,'') marca, p.unidad, IFNULL(p.existencia,0) existencia,
-                IFNULL(p.saldo,0) saldo, IFNULL(p.costoultimo,0) costoultimo, REPLACE(SUBSTR(IFNULL(cc.const,''),2),'_',' ') clase,
-                d.descripcion divisa, l.descripcion linea
-            FROM producto p
-                LEFT JOIN marca m ON p.imarca = m.sys_pk
-                INNER JOIN cclaseproducto cc ON p.iclase = cc.id
-                INNER JOIN divisa d ON p.idivisa = d.sys_pk
-                INNER JOIN linea l ON p.ilinea = l.sys_pk
-            WHERE cc.id = 3 OR cc.id = 4
-                AND IF(IFNULL(@s,'')='', true, (p.codigo LIKE CONCAT('%',@s,'%') OR p.descripcion LIKE CONCAT('%',@s,'%')))
-            ORDER BY p.codigo
-            LIMIT #<@default_max_rows>;
+        SELECT
+            p.sys_pk,
+            p.codigo,
+            p.descripcion,
+            p.unidad,
+            IFNULL(p.costoultimo,0) costoultimo,
+            IFNULL(p.existencia,0) existencia,
+            IFNULL(p.saldo,0) saldo,
+            IFNULL(m.descripcion,'') marca,
+            REPLACE(SUBSTR(IFNULL(cc.const,''),2),'_',' ') clase,
+            d.descripcion divisa,
+            l.descripcion linea
+        FROM producto p
+            LEFT JOIN marca m ON p.imarca = m.sys_pk
+            INNER JOIN cclaseproducto cc ON p.iclase = cc.id
+            INNER JOIN divisa d ON p.idivisa = d.sys_pk
+            INNER JOIN linea l ON p.ilinea = l.sys_pk
+        WHERE cc.id IN (3,4,5)
+            AND IF(IFNULL(@s,'')='', true, (p.codigo = @s OR p.descripcion LIKE CONCAT('%',@s,'%')))
+        ORDER BY p.codigo
+        LIMIT #<@default_max_rows>;
         "
         return dbr.list(db, ftext(query), params)
 		exception
@@ -287,7 +347,7 @@ module "model"
         sql_tipoprod = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM ctipoproducto ORDER BY id DESC;"
         sql_metodval = "SELECT id, const FROM cmetodosvaluacion;"
         sql_impuesto = "SELECT sys_pk, nombre FROM cfgimpuesto;"
-        sql_clasprod = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM cclaseproducto WHERE id = 3 OR id = 4 ORDER BY id DESC;"
+        sql_clasprod = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM cclaseproducto WHERE id IN (3,4,5) ORDER BY id DESC;"
         sql_tipocomi = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM ctiposcomisionesproducto ORDER BY id;"
         sql_formcomi = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM cformacomisionproducto ORDER BY id;"
         sql_grupoprd = "SELECT sys_pk, nombre FROM grupoproductos ORDER BY nombre;"

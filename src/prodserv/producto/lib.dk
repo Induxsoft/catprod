@@ -152,6 +152,7 @@ module "lib"
         ref rec = dbr.rec(db, sql, prm)
         return  ifnull(rec, record.create())
     }
+
     function filter_forma_comision(&formas, tipo)
     {
         ref list = list.create()
@@ -199,6 +200,7 @@ module "lib"
 
         return list
     }
+
     function get_variation_with_min_value(&lst,field)
     {
         ref variation = record.create()
@@ -214,6 +216,7 @@ module "lib"
 
         return variation
     }
+
     function get_base_url(context)
     {
         method = ifstr(parse.bool(@@(context,"request/headers/HTTPS")),"https","http")
@@ -221,5 +224,45 @@ module "lib"
         port = @@(context, "request/headers/SERVER_PORT")
 
         return method+"://"+host+":"+port
+    }
+
+    function proccessEnsambles(&ensambles)
+    {
+        // calcular la representacion de cada fila
+        cantidad_total = 0
+        for i = 0; i < list.count(ensambles)
+        {
+            ref ensamble = list.obj(ensambles,i)
+            cantidad_total = cantidad_total + @@(ensamble,"#cantidad")
+        }
+        for i = 0; i < list.count(ensambles)
+        {
+            ref ensamble = list.obj(ensambles,i)
+            ensamble<"representacion"> : (div(@@(ensamble,"#cantidad"),cantidad_total)*100)
+        }
+        
+        do autoFillRows(ensambles,15)
+        return ensambles
+    }
+
+    function getTotal(&list,field)
+    {
+        total = 0
+        for i = 0; i < list.count(list)
+        {
+            ref obj = list.obj(list,i)
+            total = total + @@(obj,"#"+field)
+        }
+        return total
+    }
+
+    // si no hay más de {minrows} filas, autorellenar con filas vacias.
+    function autoFillRows(&list,minrows)
+    {
+        add = (minrows - list.count(list))
+        repeat add
+        {
+            do list.add(list,record.create())
+        }
     }
 }
