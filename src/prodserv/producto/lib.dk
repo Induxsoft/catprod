@@ -228,17 +228,16 @@ module "lib"
 
     function proccessEnsambles(&ensambles)
     {
-        // calcular la representacion de cada fila
-        cantidad_total = 0
+        // calcular el % de representación de cada fila
+        c_materiales = 0
         for i = 0; i < list.count(ensambles)
         {
-            ref ensamble = list.obj(ensambles,i)
-            cantidad_total = cantidad_total + @@(ensamble,"#cantidad")
+            c_materiales = c_materiales + @@(list.obj(ensambles,i),"#importe")
         }
         for i = 0; i < list.count(ensambles)
         {
             ref ensamble = list.obj(ensambles,i)
-            ensamble<"representacion"> : (div(@@(ensamble,"#cantidad"),cantidad_total)*100)
+            ensamble<"representacion"> : (div(@@(ensamble,"#importe"),c_materiales) * 100)
         }
         
         do autoFillRows(ensambles,15)

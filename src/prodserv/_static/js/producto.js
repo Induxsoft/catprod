@@ -151,32 +151,44 @@ var producto =
     },
     select_class_changed(selectClass)
     {
+        const tab_ensamble = document.getElementById("ensamble-tab");
         const ipt_unidad = document.querySelector('input[name="unidad"]');
         const ipt_unidadb = document.querySelector('input[name="unidadb"]');
 
         this.iclase_selected = Number(selectClass.value);
         let disable = false;
-        
-        if (selectClass.value == '3') {
-            const ipt_factorb = document.querySelector('input[name="factorb"]');
-            const msg_factor = document.querySelector('#mesage_factor');
+        let show_tab_ensamble = false;
 
-            ipt_unidad.value = "SERVICIO";
-            ipt_factorb.value = 1;
-            ipt_unidadb.value = "SERVICIO";
-            msg_factor.textContent = "";
-            disable = true;
-        }
-        else {
-            ipt_unidad.value = "PZA";
-            ipt_unidadb.value = "PZA";
-            disable = false;
+        switch (selectClass.value) {
+            case '3':
+                const ipt_factorb = document.querySelector('input[name="factorb"]');
+                const msg_factor = document.querySelector('#mesage_factor');
+
+                ipt_unidad.value = "SERVICIO";
+                ipt_factorb.value = 1;
+                ipt_unidadb.value = "SERVICIO";
+                msg_factor.textContent = "";
+                
+                disable = true;
+                break;
+            case '5':
+                ipt_unidad.value = "PZA";
+                ipt_unidadb.value = "PZA";
+                
+                show_tab_ensamble = true;
+                break;
+        
+            default:
+                ipt_unidad.value = "PZA";
+                ipt_unidadb.value = "PZA";
+                break;
         }
 
         const select_tipo = document.querySelector('select[name="itipo"]');
         const elem_unidad = document.querySelectorAll('.elem-unidad');
         const genrl_check = document.querySelectorAll('.genrl-check');
 
+        tab_ensamble.parentNode.classList.toggle('d-none',!show_tab_ensamble);
         select_tipo.value = (disable ? 1 : 2);
         select_tipo.toggleAttribute('disabled', disable);
         elem_unidad.forEach(elem => elem.toggleAttribute('disabled', disable));
@@ -352,13 +364,14 @@ var ensamble =
     {
         console.log("Calculando...");
 
-        let t_cantidad = this.array.reduce((total,obj) => Math.add(total,Number(obj.cantidad??0)), 0);
-        let c_materiales = 0;
+        let c_materiales = this.array.reduce((total,obj) => Math.add(total,Math.mul(obj.costoultimo??0,obj.cantidad??0)),0);
         this.array.forEach((prod,index) => {
             if (prod.elemento != undefined) {
-                prod['representacion'] = Math.mul(Math.div(Number(prod.cantidad??0),t_cantidad),100);
-                prod['importe'] = Math.mul(Number(prod.cantidad??0),Number(prod.costoultimo??0));
-                c_materiales = Math.add(c_materiales,Number(prod.importe));
+                let importe = Math.mul(Number(prod.costoultimo??0),Number(prod.cantidad??0));
+
+                prod['importe'] = importe;
+                prod['representacion'] = Math.mul(Math.div(importe,c_materiales),100);
+                
                 this.table.UpdateRow(index);
             }
         });

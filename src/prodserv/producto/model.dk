@@ -19,7 +19,7 @@ module "model"
         pe.unidad,
         IFNULL(ie.cantidad,0) cantidad,
         IFNULL(pe.costoultimo,0) costoultimo, 
-        IFNULL(pe.costoultimo,0) importe,
+        ROUND(IFNULL(pe.costoultimo,0) * IFNULL(ie.cantidad,0), 8) importe,
         100 AS representacion
     FROM iensamble ie
         INNER JOIN producto pe ON ie.elemento = pe.sys_pk

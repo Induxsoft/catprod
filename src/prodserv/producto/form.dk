@@ -42,7 +42,8 @@ module "form.dk"
     ref prov3 = lib.get_proveedor(database, @@(producto,"$proveedor3"))
 
     exists_mp = dir.exists(@CATBAS_MAS_PRECIOS_PATH)
-    isServ = (@@(producto,'#iclase') == @clsServicio)
+    isEnsamble = (@@(producto,"#iclase") == @clsEnsamble)
+    isServicio = (@@(producto,'#iclase') == @clsServicio)
     cMateriales = getTotal(ensamble,"importe")
     sinComi = (@@(producto,'#tipocomision') == 0)
     comiXPrice = (@@(producto,'#formacomision') == 2)
@@ -88,7 +89,7 @@ module "form.dk"
                     li(class="nav-item" role="presentation") {
                         button(class="nav-link active" id="general-tab" "data-bs-toggle"="tab" "data-bs-target"="#general" type="button" role="tab" "aria-controls"="general" "aria-selected"="true"){$"General"}
                     }
-                    li(class="nav-item" role="presentation") {
+                    li(class="nav-item #<ifstr(not(isEnsamble),'d-none','')>" role="presentation") {
                         button(class="nav-link" id="ensamble-tab" "data-bs-toggle"="tab" "data-bs-target"="#ensamble" type="button" role="tab" "aria-controls"="ensamble" "aria-selected"="false"){$"Ensamble"}
                     }
                     li(class="nav-item" role="presentation") {
@@ -133,7 +134,7 @@ module "form.dk"
                                     small(class="fw-bold"){$"Tipo:"}
                                     #!
                                     ref def_tp = lib.def_tipos_producto(tipoprod, @@(producto,'itipo'))
-                                    if isServ { def_tp<"attributes/disabled">:"" }
+                                    if isServicio { def_tp<"attributes/disabled">:"" }
                                     do uie.dbSelect(def_tp)
                                     #$
                                 }
@@ -209,14 +210,14 @@ module "form.dk"
                                         small{$"Factor:"}
                                         div(class="d-flex gap-2 align-items-center")
                                         {
-                                            input(type="number" class="induxsoft-form-control elem-unidad" name="factorb" value="#<field.dnum(producto,'factorb',1)>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad" name="factorb" value="#<field.dnum(producto,'factorb',1)>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")
                                             p(class="m-0"){$"="}
                                         }
                                     }
                                     div
                                     {
                                         small{$"Unidad de compra:"}
-                                        input(type="text" class="induxsoft-form-control elem-unidad" name="unidadb" value="#<field.dstr(producto,'unidadb','PZA')>" maxlength="10" "#<ifstr(isServ,'disabled','')>"="")
+                                        input(type="text" class="induxsoft-form-control elem-unidad" name="unidadb" value="#<field.dstr(producto,'unidadb','PZA')>" maxlength="10" "#<ifstr(isServicio,'disabled','')>"="")
                                     }
                                 }
                                 div(class="d-flex justify-content-center")
@@ -231,13 +232,13 @@ module "form.dk"
                             {
                                 div(class="form-check")
                                 {
-                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true" "#<ifstr(isServ,'disabled','')>"="")
+                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true" "#<ifstr(isServicio,'disabled','')>"="")
                                     label(class="form-check-label" "for"="check_req_ns"){$"Requiere manejar número de serie"}
                                     input(type="hidden" name="reqserie" id="ipt_reqserie" value="#<@@(producto,'#reqserie')>" required="true")
                                 }
                                 div(class="form-check")
                                 {
-                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true" "#<ifstr(isServ,'disabled','')>"="")
+                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true" "#<ifstr(isServicio,'disabled','')>"="")
                                     label(class="form-check-label" "for"="check_req_lt"){$"Requiere manejar lotes"}
                                     input(type="hidden" name="reqlote" id="ipt_reqlote" value="#<@@(producto,'#reqlote')>" required="true")
                                 }
@@ -282,10 +283,10 @@ module "form.dk"
                                         {
                                             "edit-th"(type="Text" field="codigo" button="true"){$"Código"}
                                             "edit-th"(type="Text" field="descripcion" button="true"){$"Descripción"}
-                                            "edit-th"(type="Text" field="unidad"){$"Unidad"}
-                                            "edit-th"(type="Number" field="cantidad" textalign="end" format="true" decs="2"){$"Cantidad"}
-                                            "edit-th"(type="NoEditable" field="costoultimo" textalign="end" format="true" decs="2" prefix="$" thousandssep="true"){$"Costo"}
-                                            "edit-th"(type="NoEditable" field="importe" textalign="end" format="true" decs="2" prefix="$" thousandssep="true"){$"Importe"}
+                                            "edit-th"(type="Text" field="unidad" textalign="center"){$"Unidad"}
+                                            "edit-th"(type="Number" field="cantidad" textalign="center" format="true" decs="3"){$"Cantidad"}
+                                            "edit-th"(type="NoEditable" field="costoultimo" textalign="end" format="true" decs="8" prefix="$" thousandssep="true"){$"Costo"}
+                                            "edit-th"(type="NoEditable" field="importe" textalign="end" format="true" decs="8" prefix="$" thousandssep="true"){$"Importe"}
                                             "edit-th"(type="NoEditable" field="representacion" textalign="end" format="true" decs="2" sufix="%"){$"% Representación"}
                                         }
                                     }
@@ -544,12 +545,12 @@ module "form.dk"
                                         div(class="flex-grow-1")
                                         {
                                             small{$"Unidad:"}
-                                            input(type="text" class="induxsoft-form-control elem-unidad mb-2" name="unidadc" value="#<@@(producto,'$unidadc')>" maxlength="10" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="text" class="induxsoft-form-control elem-unidad mb-2" name="unidadc" value="#<@@(producto,'$unidadc')>" maxlength="10" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                         div(class="flex-grow-1")
                                         {
                                             small{$"Factor:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="factorc" value="#<@@(producto,'#factorc')>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="factorc" value="#<@@(producto,'#factorc')>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                     }
                                     div(class="d-flex gap-2")
@@ -557,12 +558,12 @@ module "form.dk"
                                         div(class="flex-grow-1")
                                         {
                                             small{$"Unidad:"}
-                                            input(type="text" class="induxsoft-form-control elem-unidad mb-2" name="unidadd" value="#<@@(producto,'$unidadd')>" maxlength="10" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="text" class="induxsoft-form-control elem-unidad mb-2" name="unidadd" value="#<@@(producto,'$unidadd')>" maxlength="10" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                         div(class="flex-grow-1")
                                         {
                                             small{$"Factor:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="factord" value="#<@@(producto,'#factord')>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="factord" value="#<@@(producto,'#factord')>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                     }
                                     div(class="d-flex gap-2")
@@ -570,12 +571,12 @@ module "form.dk"
                                         div(class="flex-grow-1")
                                         {
                                             small{$"Unidad:"}
-                                            input(type="text" class="induxsoft-form-control elem-unidad mb-2" name="unidade" value="#<@@(producto,'$unidade')>" maxlength="10" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="text" class="induxsoft-form-control elem-unidad mb-2" name="unidade" value="#<@@(producto,'$unidade')>" maxlength="10" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                         div(class="flex-grow-1")
                                         {
                                             small{$"Factor:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="factore" value="#<@@(producto,'#factore')>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="factore" value="#<@@(producto,'#factore')>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                     }
                                 }
@@ -586,12 +587,12 @@ module "form.dk"
                                         div
                                         {
                                             small{$"Máximo:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="maximo" value="#<@@(producto,'#maximo')>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="maximo" value="#<@@(producto,'#maximo')>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                         div
                                         {
                                             small{$"Reorden:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="puntoro" value="#<@@(producto,'#puntoro')>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="puntoro" value="#<@@(producto,'#puntoro')>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                     }
                                     div(class="d-flex gap-2")
@@ -599,12 +600,12 @@ module "form.dk"
                                         div
                                         {
                                             small{$"Mínimo:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="minimo" value="#<@@(producto,'#minimo')>" step="#<_step>" max="#<_max>" "#<ifstr(isServ,'disabled','')>"="")   
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="minimo" value="#<@@(producto,'#minimo')>" step="#<_step>" max="#<_max>" "#<ifstr(isServicio,'disabled','')>"="")   
                                         }
                                         div
                                         {
                                             small{$"Días de entrega:"}
-                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="diasentrega" value="#<@@(producto,'#diasentrega')>" "#<ifstr(isServ,'disabled','')>"="")
+                                            input(type="number" class="induxsoft-form-control elem-unidad mb-2" name="diasentrega" value="#<@@(producto,'#diasentrega')>" "#<ifstr(isServicio,'disabled','')>"="")
                                         }
                                     }
                                 }
