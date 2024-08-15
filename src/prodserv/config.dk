@@ -7,6 +7,7 @@ module "config"
     @JS_PRODUCTO = "/$/prodserv/js/producto.js"
     @JS_GALERIA = "/$/prodserv/js/galeria.js"
     @JS_LINEA = "/$/prodserv/js/linea.js"
+    @JS_MAS_PRECIOS = "/$/prodserv/js/mas_precios.js"
     
     @CSS_MAIN = "/$/prodserv/css/main.css"
     @CSS_GALERIA = "/$/prodserv/css/galeria.css"
@@ -14,10 +15,11 @@ module "config"
     // _PACKAGE
     @BATCH_TASKMAN="/!/batch/taskman/"
     @PRODSERV_PRODUCTO = "/!/prodserv/productos/"
+    @PRODSERV_ADD_EDIT_PRODUCTO = "/!/prodserv/productos/@id/"
     @PRODSERV_LINEA = "/!/prodserv/linea/"
     @PRODSERV_GALERIA = "/!/prodserv/productos/@id/galeria/"
-
-    @PRODSERV_ADD_EDIT_PRODUCTO = "/!/prodserv/productos/@id/"
+    @PRODSERV_MAS_PRECIOS = "/!/prodserv/mas_precios/"
+    @PRODSERV_MAS_PRECIOS_PATH = "prodserv/mas_precios/"
 
     @PRODSERV_SEARCH_LINEA = "/!/prodserv/productos/?_view=linea&s=@search"
     @PRODSERV_SEARCH_DIVISA  = "/!/prodserv/productos/?_view=divisa&s=@search"
@@ -28,9 +30,6 @@ module "config"
 
     @URL_IMAGES = "/!/prodserv/galeria/@sku/"
     @URL_IMAGE = "/!/prodserv/galeria/@sku/@image_id/"
-
-    @CATBAS_MAS_PRECIOS = "/!/catbas/mas_precios/"
-    @CATBAS_MAS_PRECIOS_PATH = "catbas/mas_precios/"
 
     @default_max_rows=250
 

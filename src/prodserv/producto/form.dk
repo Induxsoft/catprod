@@ -41,7 +41,7 @@ module "form.dk"
     ref prov2 = lib.get_proveedor(database, @@(producto,"$proveedor2"))
     ref prov3 = lib.get_proveedor(database, @@(producto,"$proveedor3"))
 
-    exists_mp = dir.exists(@CATBAS_MAS_PRECIOS_PATH)
+    exists_mp = dir.exists(@PRODSERV_MAS_PRECIOS_PATH)
     isEnsamble = (@@(producto,"#iclase") == @clsEnsamble)
     isServicio = (@@(producto,'#iclase') == @clsServicio)
     cMateriales = getTotal(ensamble,"importe")
@@ -704,7 +704,7 @@ module "form.dk"
         script{$'
             producto.urlFormActn = "#<formActn>";
             producto.urlBack = "#<@PRODSERV_PRODUCTO>";
-            producto.urlMasPrecios = "#<@CATBAS_MAS_PRECIOS>";
+            producto.urlMasPrecios = "#<@PRODSERV_MAS_PRECIOS>";
             producto.currentProducto = "#<entityId>";
             producto.curr_url = "#<curr_url>";
             producto.exist_mp_app = #<exists_mp>;

@@ -1,0 +1,401 @@
+#include "dkli.dkh"
+#!
+module "form.dk"
+{
+    #include "functions.dkh"
+    #include "serialize.dkh"
+    #include "dbr.dkh"
+    #include "uielements.v12.dkl"
+    #include "../config.dk"
+    #include "../_lib/icons.dk"
+
+    do @context.begin(@crud_context)
+    ref @http_context = @('&http')
+    ref get = @@(@http_context,"&request/get")
+
+    defaultUrl = "../"
+    exit = @@(get,"exit")
+
+    if not(exit == "")
+    {
+        defaultUrl = url_dcode(exit)
+    }
+
+    entity_id = @("$parameters/_entity_id")
+    isNew = (entity_id == "_new")
+    _step = "0.00000001"
+    _max = "9999999999.99999999"
+
+    header_act::
+    { 
+        #$
+        button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" id="btn_submit"){$'#<@ICON_SAVE>'}
+    }
+
+    #! point general_act to header_act
+
+    new nav_config
+    {
+        @"title": ifstr(isNew,'Agregar','Editar') + ' más precios'
+        @"buttons*": general_act
+        @"urlexit": defaultUrl
+        member @"hidden"
+        {
+            @"print": @true
+        }
+    }
+
+    #$ div(class="container p-0")
+    {
+        form(action="." method="POST")
+        {
+            #! do uie.printV12FormBar(nav_config)
+
+            #$ input(type="hidden" name="exit" value="#<exit>")
+
+            #$ div(id="work_area" class="container-section pt-2")
+            {
+                div(class="#<ifstr(@('error/message')!='','alert alert-danger','')>"){$"#<@('error/message')>"}
+
+                input(type="hidden" name="sys_pk" value="#<field.dstr(@('&./'),'sys_pk',0)>")
+                input(type="hidden" name="sys_recver" value="#<@('./sys_recver')>")
+
+                div(class="row d-flex justify-content-end mb-4")
+                {
+                    div(class="col-sm-3")
+                    {
+                        small(class="fw-bold"){$"Último costo"}
+
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="costoultimo" value="#<@('$./costoultimo')>" step="#<_step>" max="#<_max>")
+                        }
+                    }
+                }
+                
+                div(class="row")
+                {
+                    div(class="col-sm-2")
+                    {
+                        h6(class="invisible"){$"Precios"}
+                        
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 1"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 2"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 3"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 4"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 5"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 6"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 7"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 8"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 9"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 10"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 11"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 12"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 13"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 14"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 15"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 16"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 17"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 18"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){"Precio 19"}
+                        }
+                        div(class="d-flex justify-content-end") {
+                            h6(class="price-row mb-2"){$"Precio 20"}
+                        }
+                    }
+
+                    div(class="col-sm-3")
+                    {
+                        h6{$"Utilidad"}
+
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util1" value="#<@('$./util1')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util2" value="#<@('$./util2')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util3" value="#<@('$./util3')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util4" value="#<@('$./util4')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util5" value="#<@('$./util5')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util106" value="#<@('$./util106')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util107" value="#<@('$./util107')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util108" value="#<@('$./util108')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util109" value="#<@('$./util109')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util110" value="#<@('$./util110')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util111" value="#<@('$./util111')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util112" value="#<@('$./util112')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util113" value="#<@('$./util113')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util114" value="#<@('$./util114')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util115" value="#<@('$./util115')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util116" value="#<@('$./util116')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util117" value="#<@('$./util117')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util118" value="#<@('$./util118')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util119" value="#<@('$./util119')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="util120" value="#<@('$./util120')>" step="#<_step>" max="#<_max>")
+                        }
+                    }
+
+                    div(class="col-sm-3")
+                    {
+                        h6{$"Descuento"}
+
+                        div(class="input-symbol-container")
+                        {
+                            input(class="induxsoft-form-control mb-2 invisible")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="desc2" value="#<@('$./desc2')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="desc3" value="#<@('$./desc3')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="desc4" value="#<@('$./desc4')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"%"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-symbol-text" name="desc5" value="#<@('$./desc5')>" step="#<_step>" max="#<_max>")
+                        }
+                    }
+
+                    div(class="col-sm-3")
+                    {
+                        h6{$"Precio sin impuestos"}
+
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio1" value="#<@('$./precio1')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio2" value="#<@('$./precio2')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio3" value="#<@('$./precio3')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio4" value="#<@('$./precio4')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio5" value="#<@('$./precio5')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio106" value="#<@('$./precio106')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio107" value="#<@('$./precio107')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio108" value="#<@('$./precio108')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio109" value="#<@('$./precio109')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio110" value="#<@('$./precio110')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio111" value="#<@('$./precio111')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio112" value="#<@('$./precio112')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio113" value="#<@('$./precio113')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio114" value="#<@('$./precio114')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio115" value="#<@('$./precio115')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio116" value="#<@('$./precio116')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio117" value="#<@('$./precio117')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio118" value="#<@('$./precio118')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio119" value="#<@('$./precio119')>" step="#<_step>" max="#<_max>")
+                        }
+                        div(class="input-symbol-container")
+                        {
+                            small(class="input-symbol-prefix"){$"$"}
+                            input(type="number" class="induxsoft-form-control mb-2 input-number-text" name="precio120" value="#<@('$./precio120')>" step="#<_step>" max="#<_max>")
+                        }
+                    }
+                }
+            }
+        }
+
+        style{$'
+            .price-row { font-weight: 500; line-height: 1.5; border: none; padding: 0.375rem 0.75rem !important }
+            .input-symbol-container { position: relative; }
+            .input-symbol-prefix { position: absolute; top: 50%; transform: translateY(-50%); margin-left: 6px; }
+            .input-number-text { padding-left: 17px !important; }
+            .input-symbol-text { padding-left: 20px !important; }
+        '}
+        script(src="#<@JS_MAS_PRECIOS>"){$""}
+    }
+
+    #! do @context.end()
+}

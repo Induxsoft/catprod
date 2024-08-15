@@ -1,0 +1,24 @@
+#include "dkli.dkh"
+#!
+
+module "model"
+{
+    @table_name = "producto"
+
+    function masprecios_update(&db,&params,&data)
+    {
+        exit = @@(data,"exit")
+
+        if not(exit == "")
+        {
+            @url_redir = url_dcode(exit)
+        }
+
+        do field.remove(data,"exit")
+
+        ref res = entity.create(db,params,data)
+        return res
+    }
+    
+    point @update to masprecios_update
+}
