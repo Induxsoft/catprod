@@ -5,6 +5,7 @@ module "form.dk"
     #include "functions.dkh"
     #include "serialize.dkh"
     #include "dbr.dkh"
+    #include "dbr.vars.dkl"
     #include "uielements.v12.dkl"
     #include "../config.dk"
     #include "lib.dk"
@@ -26,12 +27,14 @@ module "form.dk"
     ref database = @("&database")
 
     entityId = @("$parameters/_entity_id")
+    decimals = @("#parameters/decimals")
     errorMsg = @("$error/message")
     @isNewEnt = (entityId == "_new")
-    _step = "0.00000001"
-    _max = "9999999999.99999999"
+    _step = "0."+padright("",(decimals-1),"0")+"1"
+    _max = "9999999999."+padright("",decimals,"9")
     formActn = replace(@PRODSERV_ADD_EDIT_PRODUCTO, "@id", entityId)
     curr_url = url_encode(path.concat(get_base_url(@('&http')),formActn))
+    m_calc_desc = parse.num(dbr.vars.getd(database,"FXCA021","2"))
 
     ref divsa = lib.get_divisa(database, field.dnum(producto,"idivisa",1))
     ref linea = lib.get_linea(database, @@(producto,"$ilinea"))
@@ -50,7 +53,7 @@ module "form.dk"
     chkLimit = parse.bool(@@(producto,'#flaglimites'))
 
     header_act::
-    { 
+    {
         if not(@isNewEnt) { #$ button(type="button" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" id="btn_more_prices" title="Más precios"){ $'Más precios' } }
         button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action" id="btn_submit"){ $'#<@@(@icons,"save")>' }
         #!
@@ -416,83 +419,128 @@ module "form.dk"
                                 div(class="col-lg-3 col-md-3 col-8")
                                 {
                                     label(class="form-label fw-500"){$"Precios (antes de impuestos)"}
-                                    div(class="input-symbol-container")
-                                    {
-                                        small(class="input-symbol-prefix"){$"$"}
-                                        input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio1" value="#<@@(producto,'#precio1')>" step="#<_step>" max="#<_max>")
+                                    div(class="d-flex align-items-center") {
+                                        b(class="me-2"){"1"}
+                                        div(class="input-symbol-container w-100") {
+                                            small(class="input-symbol-prefix"){"$"}
+                                            input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio1" value="#<@@(producto,'#precio1')>" step="#<_step>" max="#<_max>")
+                                        }
                                     }
-                                    div(class="input-symbol-container")
-                                    {
-                                        small(class="input-symbol-prefix"){$"$"}
-                                        input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio2" value="#<@@(producto,'#precio2')>" step="#<_step>" max="#<_max>")
+                                    div(class="d-flex align-items-center") {
+                                        b(class="me-2"){"2"}
+                                        div(class="input-symbol-container w-100") {
+                                            small(class="input-symbol-prefix"){"$"}
+                                            input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio2" value="#<@@(producto,'#precio2')>" step="#<_step>" max="#<_max>")
+                                        }
                                     }
-                                    div(class="input-symbol-container")
-                                    {
-                                        small(class="input-symbol-prefix"){$"$"}
-                                        input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio3" value="#<@@(producto,'#precio3')>" step="#<_step>" max="#<_max>")
+                                    div(class="d-flex align-items-center") {
+                                        b(class="me-2"){"3"}
+                                        div(class="input-symbol-container w-100") {
+                                            small(class="input-symbol-prefix"){"$"}
+                                            input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio3" value="#<@@(producto,'#precio3')>" step="#<_step>" max="#<_max>")
+                                        }
                                     }
-                                    div(class="input-symbol-container")
-                                    {
-                                        small(class="input-symbol-prefix"){$"$"}
-                                        input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio4" value="#<@@(producto,'#precio4')>" step="#<_step>" max="#<_max>")
+                                    div(class="d-flex align-items-center") {
+                                        b(class="me-2"){"4"}
+                                        div(class="input-symbol-container w-100") {
+                                            small(class="input-symbol-prefix"){"$"}
+                                            input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio4" value="#<@@(producto,'#precio4')>" step="#<_step>" max="#<_max>")
+                                        }
                                     }
-                                    div(class="input-symbol-container")
-                                    {
-                                        small(class="input-symbol-prefix"){$"$"}
-                                        input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio5" value="#<@@(producto,'#precio5')>" step="#<_step>" max="#<_max>")
+                                    div(class="d-flex align-items-center") {
+                                        b(class="me-2"){"5"}
+                                        div(class="input-symbol-container w-100") {
+                                            small(class="input-symbol-prefix"){"$"}
+                                            input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-sin" name="precio5" value="#<@@(producto,'#precio5')>" step="#<_step>" max="#<_max>")
+                                        }
                                     }
                                 }
-                                div(class="col-lg-1 col-md-2 col-4 d-flex flex-wrap flex-row pb-2 pt-4" style="align-content:space-between;")
+                                div(class="col-lg-1 col-md-2 col-4 d-flex flex-wrap flex-row py-4" style="align-content:space-between;")
                                 {
-                                    div(class="w-100 flex-grow-1"){small(class="d-block"){$"P. Máximo"}}
-                                    div{small(class="d-block"){$"P. Mínimo"}}
+                                    div(class="w-100"){small(class="d-block"){$"P. Máximo"}}
+                                    div(class="w-100"){small(class="d-block"){$"P. Mínimo"}}
                                 }
-                                div(class="col-lg-2 col-md-3 col-8")
+
+                                div(class="col-lg-2 col-md-3 col-8 border-start ps-2")
                                 {
                                     label(class="form-label fw-500"){$"% Utilidad"}
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-util" name="util1" value="#<@@(producto,'#util1')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-util" name="util2" value="#<@@(producto,'#util2')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-util" name="util3" value="#<@@(producto,'#util3')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-util" name="util4" value="#<@@(producto,'#util4')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-util" name="util5" value="#<@@(producto,'#util5')>" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" value="#<@@(producto,'#util1')>" id="txt_util1" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" value="#<@@(producto,'#util2')>" id="txt_util2" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" value="#<@@(producto,'#util3')>" id="txt_util3" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" value="#<@@(producto,'#util4')>" id="txt_util4" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-util" value="#<@@(producto,'#util5')>" id="txt_util5" step="#<_step>" max="#<_max>")
+                                    button(type="button" class="btn btn-xs btn-secondary float-end" id="btn_util_1"){">>"}
                                 }
-                                div(class="col-lg-1 col-md-2 col-4 text-end")
+                                div(class="col-lg-1 col-md-2 col-4 text-start pe-2")
                                 {
                                     label(class="form-label"){$"&nbsp;"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"&nbsp;"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="util1" value="#<@@(producto,'#util1')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="util2" value="#<@@(producto,'#util2')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="util3" value="#<@@(producto,'#util3')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="util4" value="#<@@(producto,'#util4')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="util5" value="#<@@(producto,'#util5')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    button(type="button" class="btn btn-xs btn-secondary" id="btn_util_2"){"<<"}
                                 }
-                                div(class="col-lg-2 col-md-3 col-8")
+
+                                div(class="col-lg-2 col-md-3 col-8 border-start ps-2")
                                 {
                                     label(class="form-label fw-500"){$"% Descuento"}
-                                    input(type="number" class="induxsoft-form-control mb-2 opacity-0" name="" value="" style="pointer-events:none;")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-desc" name="desc2" value="#<@@(producto,'#desc2')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-desc" name="desc3" value="#<@@(producto,'#desc3')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-desc" name="desc4" value="#<@@(producto,'#desc4')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-desc" name="desc5" value="#<@@(producto,'#desc5')>" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 opacity-0" style="pointer-events:none;")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-desc" value="#<@@(producto,'#desc2')>" id="txt_desc2" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-desc" value="#<@@(producto,'#desc3')>" id="txt_desc3" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-desc" value="#<@@(producto,'#desc4')>" id="txt_desc4" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-desc" value="#<@@(producto,'#desc5')>" id="txt_desc5" step="#<_step>" max="#<_max>")
+                                    button(type="button" class="btn btn-xs btn-secondary float-end" id="btn_desc_1"){">>"}
                                 }
-                                div(class="col-lg-1 col-md-2 col-4 text-end")
+                                div(class="col-lg-1 col-md-2 col-4 text-start pe-2")
                                 {
                                     label(class="form-label"){$"&nbsp;"}
                                     small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"&nbsp;"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
-                                    small(class="form-control bg-transparent rounded-0 border-0 mb-2"){$"0 %"}
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="desc2" value="#<@@(producto,'#desc2')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="desc3" value="#<@@(producto,'#desc3')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="desc4" value="#<@@(producto,'#desc4')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    div(class="input-symbol-container mb-2") {
+                                        input(type="number" class="induxsoft-form-control bg-transparent no-shadow" name="desc5" value="#<@@(producto,'#desc5')>" step="#<_step>" max="#<_max>" readonly="")
+                                        small(class="input-symbol-sufix"){"%"}
+                                    }
+                                    button(type="button" class="btn btn-xs btn-secondary" id="btn_desc_2"){"<<"}
                                 }
-                                div(class="col-lg-2 col-md-3 col-sm-4 col-6 #<ifstr(not(chkLimit),'d-none','')>" id="div_precios_lim")
+
+                                div(class="col-lg-2 col-md-3 col-sm-4 col-6 border-start ps-2 #<ifstr(not(chkLimit),'d-none','')>" id="div_precios_lim")
                                 {
-                                    label(class="form-label fw-500"){$"Limites"}
+                                    label(class="form-label fw-500"){$"Límites"}
                                     input(type="number" class="induxsoft-form-control mb-2 opacity-0" name="" value="" style="pointer-events:none;")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-lim" name="lim2" value="#<@@(producto,'#lim2')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-lim" name="lim3" value="#<@@(producto,'#lim3')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-lim" name="lim4" value="#<@@(producto,'#lim4')>" step="#<_step>" max="#<_max>")
-                                    input(type="number" class="induxsoft-form-control mb-2 input-number-text precio-lim" name="lim5" value="#<@@(producto,'#lim5')>" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-lim" name="lim2" value="#<@@(producto,'#lim2')>" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-lim" name="lim3" value="#<@@(producto,'#lim3')>" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-lim" name="lim4" value="#<@@(producto,'#lim4')>" step="#<_step>" max="#<_max>")
+                                    input(type="number" class="induxsoft-form-control mb-2 precio-lim" name="lim5" value="#<@@(producto,'#lim5')>" step="#<_step>" max="#<_max>")
                                 }
-                                div(class="col-lg-2 col-md-3 col-sm-4 col-6 #<ifstr(sinComi || not(comiXPrice),'d-none','')>" id="comisiones_precio_container")
+
+                                div(class="col-lg-2 col-md-3 col-sm-4 col-6 border-start ps-2 #<ifstr(sinComi || not(comiXPrice),'d-none','')>" id="comisiones_precio_container")
                                 {
                                     label(class="form-label fw-500"){$"Comisiones"}
                                     input(type="number" class="induxsoft-form-control mb-2" name="comision1" value="#<@@(producto,'#comision1')>" step="#<_step>" max="#<_max>")
@@ -696,6 +744,7 @@ module "form.dk"
         style{$'
             .input-symbol-container { position: relative; }
             .input-symbol-prefix { position: absolute; top: 50%; transform: translateY(-50%); margin-left: 6px; }
+            .input-symbol-sufix { position: absolute; top: 50%; right: 0; transform: translateY(-50%); margin-right: 6px; }
             .input-number-text { padding-left: 17px !important; }
             .input-symbol-text { padding-left: 20px !important; }
         '}
@@ -709,6 +758,8 @@ module "form.dk"
             producto.curr_url = "#<curr_url>";
             producto.exist_mp_app = #<exists_mp>;
             producto.formcomi = #<to.json(formcomi)>;
+            producto.decimals = #<decimals>;
+            producto.m_calc_desc = #<m_calc_desc>;
         '}
     }
 }

@@ -3,7 +3,7 @@ var producto =
     urlFormActn:'', urlBack:'', formcomi:[],
     urlMasPrecios:'', exist_mp_app: false,
     currentProducto: '', curr_url:'',
-    iclase_selected: 4, ff:[],
+    iclase_selected: 4, ff:null, decimals:2, m_calc_desc:2,
     tbl_ensamble:null, arr_ensamble:[],
 
     init()
@@ -33,6 +33,10 @@ var producto =
         const ipt_utilmin = document.querySelector('input[name="utilmin"]');
         const ipt_costoultimo = document.querySelector('input[name="costoultimo"]');
         const btn_more_prices = document.querySelector('#btn_more_prices');
+        const btn_util_1 = document.getElementById("btn_util_1");
+        const btn_util_2 = document.getElementById("btn_util_2");
+        const btn_desc_1 = document.getElementById("btn_desc_1");
+        const btn_desc_2 = document.getElementById("btn_desc_2");
 
         if (check_req_n && ipt_reqsrie) check_req_n.addEventListener('change', e => { this.set_ipt_check_value(ipt_reqsrie, check_req_n) });
         if (check_req_l && ipt_reqlote) check_req_l.addEventListener('change', e => { this.set_ipt_check_value(ipt_reqlote, check_req_l) });
@@ -41,11 +45,74 @@ var producto =
         if (check_viewp && ipt_visible) check_viewp.addEventListener('change', e => { this.set_ipt_check_value(ipt_visible, check_viewp) });
         if (check_compc && ipt_complem) check_compc.addEventListener('change', e => { this.set_ipt_check_value(ipt_complem, check_compc) });
 
-        if (form_cntnr) form_cntnr.addEventListener('submit', e => { this.create_update_product(e) });
+        if (form_cntnr)
+        {
+            form_cntnr.addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+            form_cntnr.addEventListener('submit', e => {
+                e.preventDefault();
+                this.create_update_product();
+            });
+        }
         if (select_clase) select_clase.addEventListener('change', e => this.select_class_changed(select_clase));
         if (formacomision) formacomision.addEventListener('change', e => this.change_comision_field(formacomision));
         if (tipocomision) tipocomision.addEventListener('change', e => this.select_comision_type(tipocomision));
         if (ipt_utilmin && ipt_costoultimo) ipt_utilmin.addEventListener('keyup', e => this.calcule_utilidad(ipt_utilmin, ipt_costoultimo));
+        if (ipt_utilmin && ipt_costoultimo) ipt_costoultimo.addEventListener('keyup', e => {
+            document.querySelectorAll(".precio-sin").forEach(input => this.calcularPorcentajeUtilidad(input));
+        });
+
+        btn_util_1.addEventListener("click", () => {
+            document.querySelectorAll(".precio-util").forEach(input => {
+                let field_to_update = "util"+input.id.replace(/\D/g,"");
+                this.ff[field_to_update].value = input.value;
+            });
+        });
+        btn_util_2.addEventListener("click", () => {
+            document.querySelectorAll(".precio-util").forEach(input => {
+                let field_to_recover = "util"+input.id.replace(/\D/g,"");
+                input.value = this.ff[field_to_recover].value;
+
+                this.calcularPrecioUtilidad(input);
+            });
+        });
+        btn_desc_1.addEventListener("click", () => {
+            document.querySelectorAll(".precio-desc").forEach(input => {
+                let field_to_update = "desc"+input.id.replace(/\D/g,"");
+                this.ff[field_to_update].value = input.value;
+            });
+        });
+        btn_desc_2.addEventListener("click", () => {
+            document.querySelectorAll(".precio-desc").forEach(input => {
+                let field_to_recover = "desc"+input.id.replace(/\D/g,"");
+                input.value = this.ff[field_to_recover].value;
+
+                this.calcularPrecioDescuento(input);
+            });
+        });
+
+        this.ff["precio1"].addEventListener("input", () => {
+            document.querySelectorAll(".precio-sin").forEach(input => {
+                this.calcularPorcentajeDescuento(input);
+            });
+        });
+
+        document.querySelectorAll(".precio-sin").forEach(input => {
+            input.addEventListener("input", (e) => {
+                this.calcularPorcentajeUtilidad(e.target);
+                this.calcularPorcentajeDescuento(e.target);
+            });
+            const event = new Event("input");
+            input.dispatchEvent(event);
+        });
+        document.querySelectorAll(".precio-util").forEach(input => {
+            input.addEventListener("input", (e) => this.calcularPrecioUtilidad(e.target));
+        });
+        document.querySelectorAll(".precio-desc").forEach(input => {
+            input.addEventListener("input", (e) => this.calcularPrecioDescuento(e.target));
+        });
+        document.querySelectorAll(".precio-lim").forEach(input => {
+            input.addEventListener("change", (e) => this.validarLimites(e.target));
+        });
 
         if (ipt_unidad && ipt_factorb && ipt_unidadb && msg_factor)
         {
@@ -94,10 +161,8 @@ var producto =
             div_limites.classList.toggle("d-none",!checked);
         }
     },
-    create_update_product(event)
+    create_update_product()
     {
-        event.preventDefault();
-
         const reqCall = control => 
         {
             let panel = control.closest('div[role="tabpanel"]');
@@ -261,11 +326,16 @@ var producto =
         let utilidad = Number(ipt_utilidad.value);
         let precio = Number(ipt_costoultimo.value);
         let percent = Math.mul(precio,Math.div(utilidad, 100));
-
-        let ipt_prices = document.querySelectorAll('.precio-sin');
         
-        ipt_prices.forEach(ipt =>{
-            ipt.value = Math.add(precio, percent);
+        document.querySelectorAll('.precio-sin').forEach(input => {
+            let field_precio_util = "txt_util"+input.name.replace(/\D/g,'');
+            let precio_util = Number(this.ff[field_precio_util].value);
+
+            if (utilidad > precio_util) {
+                input.value = Math.RoundTo(Math.add(precio,percent), this.decimals);
+                this.calcularPorcentajeUtilidad(input);
+                this.calcularPorcentajeDescuento(input);
+            }
         });
     },
     showMorePrices()
@@ -276,6 +346,96 @@ var producto =
         }
         window.location.href = this.urlMasPrecios + this.currentProducto + '/?exit='+this.curr_url;
     },
+
+    calcularPrecioUtilidad(input)
+    {
+        let percent = Number(input.value);
+        let costo = Number(this.ff["costoultimo"].value);
+        let precio = Math.mul(costo,(1 + Math.div(percent,100)));
+
+        let field_to_update = "precio"+input.id.replace(/\D/g,'');
+        const field = this.ff[field_to_update];
+
+        field.value = Math.RoundTo(precio, this.decimals);
+        this.calcularPorcentajeDescuento(field);
+        if (field_to_update === "precio1") {
+            const event = new Event("input");
+            field.dispatchEvent(event);
+        }
+    },
+    calcularPorcentajeUtilidad(input)
+    {
+        let precio = Number(input.value);
+        let costo = Number(this.ff["costoultimo"].value);
+        let percent = Math.mul(Math.div(Math.sub(precio,costo),costo),100);
+
+        let field_to_update = "txt_util"+input.name.replace(/\D/g,'');
+        this.ff[field_to_update].value = Math.RoundTo(percent, this.decimals);
+    },
+    calcularPrecioDescuento(input)
+    {
+        let precio = Number(this.ff["precio1"].value);
+        let percent = Number(input.value);
+        let pdesc = 0;
+
+        switch (this.m_calc_desc) {
+            case 1:
+                pdesc = Math.sub(precio,Math.mul(precio,Math.div(percent,100)));
+                break;
+            case 2:
+                pdesc = Math.div(precio,(1 + Math.div(percent,100)));
+                break;
+        }
+
+        let field_to_update = "precio"+input.id.replace(/\D/g,'');
+        const field = this.ff[field_to_update];
+        
+        field.value = Math.RoundTo(pdesc, this.decimals);
+        this.calcularPorcentajeUtilidad(field);
+    },
+    calcularPorcentajeDescuento(input)
+    {
+        let precio = Number(this.ff["precio1"].value);
+        let pdesc = Number(input.value);
+        let percent = 0;
+
+        switch (this.m_calc_desc) {
+            case 1:
+                percent = Math.sub(precio,Math.mul(precio,Math.div(percent,100)));
+                break;
+            case 2:
+                percent = Math.mul((Math.div(precio,pdesc) - 1),100);
+                break;
+        }
+
+        let field_to_update = "txt_desc"+input.name.replace(/\D/g,'');
+        const field = this.ff[field_to_update];
+        if (field) field.value = Math.RoundTo(percent, this.decimals);
+    },
+    validarLimites(input)
+    {
+        let curr = Number(input.name.replace("lim",""));
+        let prev = (curr - 1);
+        let next = (curr + 1);
+
+        function between(val,min,max){ return (val >= min && val <= max) }
+
+        if (prev > 1)
+        {
+            let prevval = Number(this.ff["lim"+prev]?.value ?? "0");
+            let currval = Number(input.value);
+            let nextval = Number(this.ff["lim"+next]?.value ?? "0");
+            
+            if (currval < prevval) {
+                alert("El límite para 'Precio "+curr+"' no puede ser inferior a 'Precio "+prev+"'.");
+                input.value = input.defaultValue;
+            }
+            else if (currval > nextval && nextval > 0) {
+                alert("El límite para 'Precio "+curr+"' no puede ser superior a 'Precio "+next+"'.");
+                input.value = input.defaultValue;
+            }
+        }
+    }
 }
 
 var ensamble =

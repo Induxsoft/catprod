@@ -170,10 +170,11 @@ module "model"
        // if not(dbr.security.isauth(db,@AUT_READ_PRODUCTO)) { do rise_error(500,"No autorizado") }
 	   
 		do dbr.apps.action.grant("CF10")
+        if not(field.exist(params,"decimals")){ params<"decimals"> : parse.num(dbr.vars.get(db,"FXCA001")) }
 
         sql_producto = "
         SELECT 
-            p.sys_pk, p.sys_recver, p.codigo, p.descripcion, p.iclase, p.itipo, p.unidad, IFNULL(p.costoultimo,0) costoultimo,
+            p.sys_pk, p.sys_recver, p.codigo, p.descripcion, p.iclase, p.itipo, p.unidad, ROUND(IFNULL(p.costoultimo,0),@decimals) costoultimo,
             IFNULL(p.idivisa,'') idivisa, IFNULL(p.ilinea,'') ilinea, IFNULL(p.idepartamento,'') idepartamento, IFNULL(p.imarca,'') imarca,
             IFNULL(p.proveedor1,'') proveedor1, IFNULL(p.proveedor2,'') proveedor2, IFNULL(p.proveedor3,'') proveedor3,
             IFNULL(p.factorb,1) factorb, IFNULL(p.unidadb,'') unidadb,
@@ -182,13 +183,13 @@ module "model"
             IFNULL(p.factorc,0) factorc, IFNULL(p.unidadd,'') unidadd, IFNULL(p.factord,0) factord, IFNULL(p.unidade,'') unidade,
             IFNULL(p.factore,0) factore, IFNULL(p.maximo,0) maximo, IFNULL(p.puntoro,0) puntoro, IFNULL(p.minimo,0) minimo,
             IFNULL(p.diasentrega,0) diasentrega, IFNULL(p.notas,'') notas, IFNULL(p.uf_sat_proser,'01010101') uf_sat_proser,
-            IFNULL(p.uf_sat_uniproser,'H87') uf_sat_uniproser, IFNULL(p.utilmin,0) utilmin, IFNULL(p.tipocomision,'') tipocomision,
-            IFNULL(p.formacomision,'') formacomision, IFNULL(p.comision,0) comision, IFNULL(p.ppuntos,0) ppuntos,
-            IFNULL(p.precio1,0) precio1, IFNULL(p.precio2,0) precio2, IFNULL(p.precio3,0) precio3, IFNULL(p.precio4,0) precio4, IFNULL(p.precio5,0) precio5,
-            IFNULL(p.util1,0) util1, IFNULL(p.util2,0) util2, IFNULL(p.util3,0) util3, IFNULL(p.util4,0) util4, IFNULL(p.util5,0) util5,
-            IFNULL(p.desc2,0) desc2, IFNULL(p.desc3,0) desc3, IFNULL(p.desc4,0) desc4, IFNULL(p.desc5,0) desc5,
-            IFNULL(p.lim2,0) lim2, IFNULL(p.lim3,0) lim3, IFNULL(p.lim4,0) lim4, IFNULL(p.lim5,0) lim5,
-            IFNULL(p.comision1,0) comision1, IFNULL(p.comision2,0) comision2, IFNULL(p.comision3,0) comision3, IFNULL(p.comision4,0) comision4, IFNULL(p.comision5,0) comision5,
+            IFNULL(p.uf_sat_uniproser,'H87') uf_sat_uniproser, ROUND(IFNULL(p.utilmin,0),@decimals) utilmin, IFNULL(p.tipocomision,'') tipocomision,
+            IFNULL(p.formacomision,'') formacomision, ROUND(IFNULL(p.comision,0),@decimals) comision, ROUND(IFNULL(p.ppuntos,0),@decimals) ppuntos,
+            ROUND(IFNULL(p.precio1,0),@decimals) precio1, ROUND(IFNULL(p.precio2,0),@decimals) precio2, ROUND(IFNULL(p.precio3,0),@decimals) precio3, ROUND(IFNULL(p.precio4,0),@decimals) precio4, ROUND(IFNULL(p.precio5,0),@decimals) precio5,
+            ROUND(IFNULL(p.util1,0),@decimals) util1, ROUND(IFNULL(p.util2,0),@decimals) util2, ROUND(IFNULL(p.util3,0),@decimals) util3, ROUND(IFNULL(p.util4,0),@decimals) util4, ROUND(IFNULL(p.util5,0),@decimals) util5,
+            ROUND(IFNULL(p.desc2,0),@decimals) desc2, ROUND(IFNULL(p.desc3,0),@decimals) desc3, ROUND(IFNULL(p.desc4,0),@decimals) desc4, ROUND(IFNULL(p.desc5,0),@decimals) desc5,
+            ROUND(IFNULL(p.lim2,0),@decimals) lim2, ROUND(IFNULL(p.lim3,0),@decimals) lim3, ROUND(IFNULL(p.lim4,0),@decimals) lim4, ROUND(IFNULL(p.lim5,0),@decimals) lim5,
+            ROUND(IFNULL(p.comision1,0),@decimals) comision1, ROUND(IFNULL(p.comision2,0),@decimals) comision2, ROUND(IFNULL(p.comision3,0),@decimals) comision3, ROUND(IFNULL(p.comision4,0),@decimals) comision4, ROUND(IFNULL(p.comision5,0),@decimals) comision5,
             IFNULL(p.visible,0) visible, IFNULL(p.uf_complemento,0) uf_complemento,
             IFNULL(p.flagutilidad,0) flagutilidad, IFNULL(p.flaglimites,0) flaglimites,
             IFNULL(gp.sys_pk,'') similar_group
@@ -262,6 +263,8 @@ module "model"
     {
         //if not(dbr.security.isauth(db,@AUT_ACCESS_PRODUCTO)) { do rise_error(500,"No autorizado") }
 		do dbr.apps.action.grant("CF10")
+        if not(field.exist(params,"decimals")){ params<"decimals"> : parse.num(dbr.vars.get(db,"FXCA001")) }
+
         query = "
         SELECT
             p.sys_pk,
@@ -344,6 +347,8 @@ module "model"
     }
     function prodserv.prepareView(&db, &params, &data)
     {
+        if not(field.exist(params,"decimals")){ params<"decimals"> : parse.num(dbr.vars.get(db,"FXCA001")) }
+
         sql_tipoprod = "SELECT id, REPLACE(SUBSTR(IFNULL(const,''),2),'_',' ') const FROM ctipoproducto ORDER BY id DESC;"
         sql_metodval = "SELECT id, const FROM cmetodosvaluacion;"
         sql_impuesto = "SELECT sys_pk, nombre FROM cfgimpuesto;"
