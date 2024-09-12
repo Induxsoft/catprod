@@ -261,9 +261,10 @@ module "model"
 
     function prodserv.list(&db, &params)
     {
-        //if not(dbr.security.isauth(db,@AUT_ACCESS_PRODUCTO)) { do rise_error(500,"No autorizado") }
 		do dbr.apps.action.grant("CF10")
         if not(field.exist(params,"decimals")){ params<"decimals"> : parse.num(dbr.vars.get(db,"FXCA001")) }
+        if not(field.exist(params,"fil_clase")) { params<"fil_clase"> : -1 }
+		if not(field.exist(params,"fil_linea")) { params<"fil_linea"> : -1 }
 
         query = "
         SELECT
@@ -283,20 +284,35 @@ module "model"
             INNER JOIN cclaseproducto cc ON p.iclase = cc.id
             INNER JOIN divisa d ON p.idivisa = d.sys_pk
             INNER JOIN linea l ON p.ilinea = l.sys_pk
-        WHERE cc.id IN (3,4,5)
-            AND IF(IFNULL(@s,'')='', true, (p.codigo = @s OR p.descripcion LIKE CONCAT('%',@s,'%')))
+        WHERE NOT IFNULL(p.sys_deleted,0)
+            #<conditions>
         ORDER BY p.codigo
         LIMIT #<@default_max_rows>;
         "
-        return dbr.list(db, ftext(query), params)
+
+        conditions = ""
+
+        if @@(params,"#fil_clase") > 0 { conditions = conditions + " AND p.iclase = @fil_clase" }
+        else { conditions = conditions + " AND p.iclase IN (3,4,5)" }
+        if @@(params,"#fil_linea") > 0 { conditions = conditions + " AND p.ilinea = @fil_linea" }
+        if trim(@@(params,"$s")) != "" { conditions = conditions + " AND (p.codigo = @s OR p.descripcion LIKE CONCAT('%',@s,'%'))" }
+        
+        new data
+        {
+            @"data*": dbr.list(db,ftext(query),params)
+            @"list_clases*": dbr.list(db,"SELECT id, const FROM cclaseproducto WHERE id IN (3,4,5)",@null)
+            @"list_lineas*": dbr.list(db,"SELECT sys_pk, codigo, descripcion FROM linea WHERE NOT IFNULL(sys_deleted,0) AND IF(@fil_clase>0, clase = @fil_clase, clase IN (3,4,5))",params)
+        }
+        return data
+
 		exception
 		{
 			do errordet(@false)
 			do dbr.apps.action.log()
 			do rise_error(last_error_code(),last_error())
 		}
-
     }
+
     function prodserv.delete(&db, &params)
     {
         //if not(dbr.security.isauth(db,@AUT_DELETE_PRODUCTO)) { do rise_error(500,"No autorizado") }
