@@ -297,6 +297,7 @@ module "model"
         if @@(params,"#fil_linea") > 0 { conditions = conditions + " AND p.ilinea = @fil_linea" }
         if trim(@@(params,"$s")) != "" { conditions = conditions + " AND (p.codigo = @s OR p.descripcion LIKE CONCAT('%',@s,'%'))" }
         
+        if parse.bool(@@(params,"$only-prods")) { return dbr.list(db,ftext(query),params) }
         new data
         {
             @"data*": dbr.list(db,ftext(query),params)
