@@ -201,6 +201,18 @@ model "productos y servicios"
         }
     }
 
+    entity "iensamble" : "TableModel"
+    {
+        @"cantdemasiado" decimal(18,8)
+        @"cantidad" decimal(18,8)
+        @"cantmucho" decimal(18,8)
+        @"cantpoco" decimal(18,8)
+        @"omitible" bool
+        @"elemento" ref:"producto" required
+        @"reemplazo" ref:"producto"
+        @"fk_producto_elementos" ref:"producto" required
+    }
+
     entity "divisa" : "TableModel"
     {
         @"codigo" string(5) unique required
