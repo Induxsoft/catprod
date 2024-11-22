@@ -61,7 +61,8 @@ module
     }
     function GetDataFile(codigo,path,url,namefile)
     {
-        ref @cross_domain=@null
+        if not(isset("@cross_domain")){ref @cross_domain=@null}
+        
         path=replace_paths(path)
         path=replace(path,"@_id",codigo)
 
