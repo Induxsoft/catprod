@@ -56,10 +56,13 @@ module "model"
         if @@(data,"codigo")=="" { do check_autocode(db,"linea","codigo",data) }
 
         ref entity = entity.create(db, params, data)
-        
+        params<"_entity_id">:@@(entity,"#sys_pk")
+
         do dbr.apps.action.pos(entity)
         do dbr.commit(db)
         do dbr.apps.action.ext(entity)
+
+        do SaveFile(db,params,data)
 
         exception
 		{
@@ -114,7 +117,7 @@ module "model"
     }
     function SaveFile(&db,&params,&data)
     {
-         ref files = @@(@http_context,"&request/files")
+        ref files = @@(@http_context,"&request/files")
         if isnull(files) || @count(files) < 1 { return data}
 
         ref linea=dbr.rec(db,"select sys_pk,codigo from linea where sys_pk=@_entity_id",params)

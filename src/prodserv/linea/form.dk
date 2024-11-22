@@ -24,7 +24,7 @@ module "form.dk"
 
     #$ div(class="container")
     {
-        form(method="POST" action="#<formActn>" id="form")
+        form(method="POST" action="#<formActn>" id="form" enctype="multipart/form-data")
         {
             div(id="main_bar" class="row container-section my-2 px-0 py-2 border-bottom")
             {
@@ -38,8 +38,10 @@ module "form.dk"
                     button(type="submit" class="btn btn-sm border-secondary induxsoft-corners btn-main-action"){
                         $'#<@@(@icons,"save")>'
                     }
-                    a(class="btn btn-sm border-secondary induxsoft-corners btn-main-action" href="#<@PRODSERV_LINEA>") {
-                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16") {
+                    a(class="btn btn-sm border-secondary induxsoft-corners btn-main-action" href="#<@PRODSERV_LINEA>") 
+                    {
+                        svg(xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16") 
+                        {
                             path(d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z")
                         }
                     }
@@ -112,22 +114,18 @@ module "form.dk"
                     label(class="form-check-label" "for"="check_visible"){$"Visible en punto de venta"}
                     input(type="hidden" name="visible" id="ipt_visible" value="#<@@(linea,'#visible')>")
                 }
-
+                #$
+                hr{""}
+                input(type="file" class="induxsoft-form-control d-none" id="line_file" name="line_file"  accept=".png, .jpg, .jpeg")
+                label(class="btn btn-sm btn-secondary induxsoft-corners" "for"="line_file" id="lbl_file"){"Asignar imagen a esta línea"}
+                p(id="name_file"){""}
                 #!
-                if @@(linea,"#sys_pk") > 0
+                if @@(dtfile,"$url")!="" 
                 {
                     #$
-                    hr{""}
-                    input(type="file" class="induxsoft-form-control d-none" id="line_file" name="line_file"  accept=".png, .jpg, .jpeg")
-                    label(class="btn btn-sm btn-secondary induxsoft-corners" "for"="line_file" ){"Asignar imagen a esta línea"}
-                    #!
-                    if @@(dtfile,"$url")!="" 
+                    div(class="pt-2")
                     {
-                        #$
-                        div(class="pt-2")
-                        {
-                            img(src="#<@@(dtfile,'$url')>" loading="lazy" style="height: 10rem; width: 15rem; object-fit: contain;border: 1px solid #ced4da;"){""}
-                        }
+                        img(src="#<@@(dtfile,'$url')>" loading="lazy" style="height: 10rem; width: 15rem; object-fit: contain;border: 1px solid #ced4da;"){""}
                     }
                 }
             }
@@ -137,5 +135,11 @@ module "form.dk"
             }
         }
         script(src="#<@JS_LINEA>"){$""}
+        script
+        {
+            $'
+            linea._entity=#<@@(linea,"#sys_pk")>;
+            '
+        }
     }
 }

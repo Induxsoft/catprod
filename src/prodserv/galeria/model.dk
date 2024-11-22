@@ -68,7 +68,7 @@ module "magick.lib.dk"
     }
 	getProductoBySKU::&db,sku
 	{
-		new p{@"sku":replace(trim(sku)," ","-")}
+		new p{@"sku":sku}
 		return dbr.rec(db,"select * from producto where REPLACE(TRIM(codigo),' ', '-')=@sku",p)
 	}
     #!
@@ -93,14 +93,14 @@ module "magick.lib.dk"
         ref lfiles=list.create()
 
         if not(dir.exists(pathfile)){return lfiles}
-
+        
         ref filesbd=filesbd(params)
-
+        
         for i=0;i<@count(filesbd)
         {
             ref f=@item(filesbd,i)
             file=path.concat(pathfile,@@(f,"$guidimagen"))
-
+            
             if file.exists(file)
             {
                 new data
