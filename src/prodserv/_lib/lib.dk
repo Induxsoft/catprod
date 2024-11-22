@@ -28,4 +28,59 @@ module
 
         exception{ return @false }
     }
+    replace_paths::path
+    {
+        ref get = @@(@http_context, "&request/get")
+        ref hed = @@(@http_context, "&request/headers")
+        
+        if isset("@cross_domain") && not(isnull(@cross_domain))
+        {
+            ref get = @@(@cross_domain, "&get")
+            ref hed = @@(@cross_domain, "&headers")
+        }
+        
+        _prt = ifstr(parse.bool(@@(hed,"HTTPS")),"https","http")
+        _hst = @@(hed, "HTTP_HOST")
+        _por = @@(hed, "SERVER_PORT")
+        _cnn = @@(get, "_connection")
+        _agp = @@(get, "_app_group")
+        _etp = @@(get, "_entities_type")
+        _eid = @@(get, "_entity_id")
+        _sku = @@(get, "sku")
+
+        path = replace(path, "@_protocol", _prt)
+        path = replace(path, "@_host", _hst)
+        path = replace(path, "@_port", _por)
+        path = replace(path, "@_connection", _cnn)
+        path = replace(path, "@_app_group", _agp)
+        path = replace(path, "@_entities_type", _etp)
+        path = replace(path, "@_entity_id", _eid)
+        path = replace(path, "@_sku", _sku)
+
+        return path
+    }
+    function GetDataFile(codigo,path,url,namefile)
+    {
+        ref @cross_domain=@null
+        path=replace_paths(path)
+        path=replace(path,"@_id",codigo)
+
+        pathfile=path.concat(path,namefile)
+        
+        if file.exists(pathfile)
+        {
+            url=replace_paths(url)
+            url=replace(url,"@_id",codigo)
+            url=path.concat(url,namefile)
+
+            new dt
+            {
+                @"path":pathfile
+                @"url":url
+            }
+            return dt
+        }
+
+        return @null
+    }
 }

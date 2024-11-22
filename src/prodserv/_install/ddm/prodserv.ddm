@@ -234,6 +234,7 @@ model "productos y servicios"
         @"notas" string(4096)
         @"visible" bool
         @"uf_indicaciones" string(4096)
+        @"img_file" string(128)
     }
 
     entity "cfgimpuesto" : "TableModel"

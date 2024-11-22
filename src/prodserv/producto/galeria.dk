@@ -14,10 +14,11 @@ module
     ref producto = @('&./product')
     ref ml_images = set_ml_images(imagenes)
 
+    url_exit=ifstr(@("$parameters/url_exit_encode")!="",url_dcode(@("$parameters/url_exit_encode")),@PRODSERV_PRODUCTO)
     new nav_config
     {
         @"title": "Galería de imágenes"
-        @"urlexit": @PRODSERV_PRODUCTO
+        @"urlexit": url_exit
         member "hidden" {
             @"print": @true
         }

@@ -4,15 +4,23 @@ module "form.dk"
 {
     #include "functions.dkh"
     #include "serialize.dkh"
+    #include "dbr.dkh"
     #include "../config.dk"
+    #include "dbr.vars.dkl"
+    #include "../_lib/lib.dk"
 
     do @context.begin(@crud_context)
+    ref @http_context=@("&http")
 
     ref linea = @("&./")
     entityId = @("$parameters/_entity_id")
     errorMsg = @("$error/message")
     isNewEnt = (entityId == "_new")
     formActn = @PRODSERV_LINEA+entityId+"/"
+
+    prodserv_path_img_lns_url=dbr.vars.get(@("&database"),"prodserv_path_img_lns_url")
+    attachment_path=dbr.vars.get(@("&database"),"prodserv_path_img_lns")
+    ref dtfile=GetDataFile(@@(linea,"$codigo"),attachment_path,prodserv_path_img_lns_url,@@(linea,"$img_file"))
 
     #$ div(class="container")
     {
@@ -65,33 +73,25 @@ module "form.dk"
                         small(class="fw-bold"){$"Comisión 1:"}
                         input(type="number" class="induxsoft-form-control" name="comision1" value="#<@@(linea,'#comision1')>" max="999999999.9999999" step="0.000000001")
                     }
-                }
-                div(class="row mb-2")
-                {
+                
                     div(class="col-sm-4")
                     {
                         small(class="fw-bold"){$"Comisión 2:"}
                         input(type="number" class="induxsoft-form-control" name="comision2" value="#<@@(linea,'#comision2')>" max="999999999.9999999" step="0.000000001")
                     }
-                }
-                div(class="row mb-2")
-                {
+                
                     div(class="col-sm-4")
                     {
                         small(class="fw-bold"){$"Comisión 3:"}
                         input(type="number" class="induxsoft-form-control" name="comision3" value="#<@@(linea,'#comision3')>" max="999999999.9999999" step="0.000000001")
                     }
-                }
-                div(class="row mb-2")
-                {
+                
                     div(class="col-sm-4")
                     {
                         small(class="fw-bold"){$"Comisión 4:"}
                         input(type="number" class="induxsoft-form-control" name="comision4" value="#<@@(linea,'#comision4')>" max="999999999.9999999" step="0.000000001")
                     }
-                }
-                div(class="row mb-2")
-                {
+                
                     div(class="col-sm-4")
                     {
                         small(class="fw-bold"){$"Comisión 5:"}
@@ -111,6 +111,24 @@ module "form.dk"
                     input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_visible" "#<ifstr(@@(linea,'#visible')==1,'checked','')>"="true")
                     label(class="form-check-label" "for"="check_visible"){$"Visible en punto de venta"}
                     input(type="hidden" name="visible" id="ipt_visible" value="#<@@(linea,'#visible')>")
+                }
+
+                #!
+                if @@(linea,"#sys_pk") > 0
+                {
+                    #$
+                    hr{""}
+                    input(type="file" class="induxsoft-form-control d-none" id="line_file" name="line_file"  accept=".png, .jpg, .jpeg")
+                    label(class="btn btn-sm btn-secondary induxsoft-corners" "for"="line_file" ){"Asignar imagen a esta línea"}
+                    #!
+                    if @@(dtfile,"$url")!="" 
+                    {
+                        #$
+                        div(class="pt-2")
+                        {
+                            img(src="#<@@(dtfile,'$url')>" loading="lazy" style="height: 10rem; width: 15rem; object-fit: contain;border: 1px solid #ced4da;"){""}
+                        }
+                    }
                 }
             }
             div(id="status_bar" class="container-section")

@@ -334,7 +334,7 @@ module "lib.dk"
     {
         ref get = @@(@http_context, "&request/get")
         ref hed = @@(@http_context, "&request/headers/")
-
+        
         if isset("@cross_domain") && not(isnull(@cross_domain))
         {
             ref get = @@(@cross_domain, "&get")

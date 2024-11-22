@@ -51,8 +51,8 @@
                 "varname": "prodserv_static_content_url",
                 "vardefault": "@_protocol://@_host:@_port/images/sku/@_sku/",
                 "varvalue": "@_protocol://@_host:@_port/images/sku/@_sku/",
-                "varcaption": "URL de imagenes",
-                "varhelp": "URL para la obtención de imagenes, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
+                "varcaption": "URL de imágenes de artículos",
+                "varhelp": "URL para la obtención de imágenes, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
                 "vartype": "string",
                 "varinput": 
                 {
@@ -63,8 +63,32 @@
                 "varname": "prodserv_path_static_content",
                 "vardefault": "web/@_host/images/sku/@_sku/",
                 "varvalue": "web/@_host/images/sku/@_sku/",
-                "varcaption": "Ruta de imagenes",
-                "varhelp": "Ruta para el almacenamiento de imagenes, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
+                "varcaption": "Ruta de imágenes de artículos",
+                "varhelp": "Ruta para el almacenamiento de imágenes de artículos, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            },
+            {
+                "varname": "prodserv_path_img_lns",
+                "vardefault": "web/@_host/images/lns/@_id/",
+                "varvalue": "web/@_host/images/lns/@_id/",
+                "varcaption": "Ruta de imágenes de líneas",
+                "varhelp": "Ruta para el almacenamiento de imágenes de líneas, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
+                "vartype": "string",
+                "varinput": 
+                {
+                    "control": "text"
+                }
+            },
+            {
+                "varname": "prodserv_path_img_lns_url",
+                "vardefault": "@_protocol://@_host:@_port/images/lns/@_id/",
+                "varvalue": "@_protocol://@_host:@_port/images/lns/@_id/",
+                "varcaption": "URL de imágenes de líneas",
+                "varhelp": "URL para la obtención de imágenes de líneas, admite las macros: @_protocol, @_host, @_port, @_connection, @_app_group, @_entities_type, @_entity_id, @_sku",
                 "vartype": "string",
                 "varinput": 
                 {
