@@ -1,7 +1,6 @@
 #include "dkli.dkh"
 #!
-
-module "model"
+module "Más precios"
 {
     @table_name = "producto"
 
@@ -9,14 +8,15 @@ module "model"
     {
         exit = @@(data,"exit")
 
-        if not(exit == "")
-        {
+        if not(exit == "") {
             @url_redir = url_dcode(exit)
+        } else {
+            @url_redir = "/!/prodserv/productos/"
         }
 
         do field.remove(data,"exit")
 
-        ref res = entity.create(db,params,data)
+        ref res = entity.update(db,params,data)
         return res
     }
     

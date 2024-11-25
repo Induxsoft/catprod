@@ -154,7 +154,8 @@ var mas_precios =
     calcular_porcentaje_utilidad(precio,ultCosto,field)
     {
         let ultimoCosto = Number(ultCosto.value);
-        let percent = Math.div(Math.mul(100,Math.sub(Number(precio.value),ultimoCosto)),ultimoCosto); //(100*(precio.value-ultimoCosto))/ultimoCosto;
+        //(100 * (precio.value - ultimoCosto)) / ultimoCosto;
+        let percent = Math.div(Math.mul(100,Math.sub(Number(precio.value || 0),(ultimoCosto || 0))), (ultimoCosto || 1));
         let utilidad = document.querySelector(`input[name="${field}"]`);
         
         utilidad.value = Math.RoundTo(percent,8);
