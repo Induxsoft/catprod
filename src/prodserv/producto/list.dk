@@ -1,6 +1,6 @@
 #include "dkli.dkh"
 #!
-module "list.dk"
+module "Productos y Servicios"
 {
     #include "functions.dkh"
     #include "serialize.dkh"
@@ -13,8 +13,13 @@ module "list.dk"
     #include "../_lib/scape_special_charactes2.dk"
 
     do @context.begin(@crud_context)
+
     ref productos = ifnull(@('&./data'),list.create())
+    ref titles = ifnull(@("&./titles"),record.create())
     do scape_special_charactes(productos,"codigo,descripcion")
+
+    @_entities_type = @("$parameters/_entities_type")
+    table_id = "tbl_"+@_entities_type
 
     new fil_clase
     {
@@ -126,9 +131,11 @@ module "list.dk"
         @"jscurrentcontext": "getCurrentContext"
     }
     
-    #$ div(class="v12-list-view" id="view")
+    #$
+    div(class="container-fluid" id="view")
     {
-        section(class="container-fluid bg-white" id="top_area")
+        // Filtros y acciones
+        section(id="top_area")
         {
             #!
             do uie.printV12FormBar(nav_config)
@@ -158,22 +165,65 @@ module "list.dk"
                 }
             }
         }
-
-        section(class="container-fluid" id="work_area")
+        // Contenido principal
+        section(id="work_area")
         {
-            #!
-            do uie.dbeditable(table_definition, "tbl_prodserv")
-            #$
-        }
+            div(class="show-on-print")
+            {
+                p(class="text-center my-0"){$"#<@@(titles,'$title')>"}
+                p(class="text-center my-0"){$"#<@@(titles,'$subtitle')>"}
+                p(class="text-center my-0"){$"#<@@(titles,'$subtitle_2')>"}
 
-		script(type="text/javascript")
-		{$'
-			function getCurrentContext()
-			{
-				const table = document.getElementById("tbl_prodserv");
-				const id = (table?.DataArray[table.CurrentRowIndex()]?.sys_pk ?? "");
-    			return { item_id:id, context: {} }
-			}
-		'}
+                div(class="row")
+                {
+                    div(class="col-3 text-start")
+                    {
+                        small(class="d-block"){ $"#<cut(@('$http/session/user/name'),25)>" }
+                        small(class="d-block"){ $"#<date_str(now(),'dd/MMM/yyyy')>" }
+                    }
+                    div(class="col-6 text-center")
+                    {
+                        h4(class=""){$"Informe general de productos y servicios"}
+                    }
+                    div(class="col-3 text-end")
+                    {
+                        small(class="d-block" id="lbl_filter_1"){$""}
+                        small(class="d-block" id="lbl_filter_2"){$""}
+                        small(class="d-block" id="lbl_filter_3"){$""}
+                    }
+                }
+            }
+
+            #!
+            do uie.dbeditable(table_definition,table_id)
+            #$
+
+            div(class="show-on-print"){p(class="fixed-bottom text-center my-1"){$"#<@@(titles,'$footer')>"}}
+        }
+        // Resúmenes y datos al pie
+        section(id="bottom_area")
+        {
+            //////////////////////////////////////////////////////////////////
+            div(id="_custom_area")
+            {
+                // script(src=""){$""}
+                script(type="text/javascript")
+                {$'
+                    function getCurrentContext() {
+                        const table = document.getElementById("#<table_id>");
+                        const id = (table?.DataArray[table.CurrentRowIndex()]?.sys_pk ?? "");
+                        return { item_id:id, context: {} }
+                    }
+                    
+                    document.addEventListener("DOMContentLoaded", () => {
+                        // Script injection
+                        #<@@(@crud_context,"script")>
+                    });
+                '}
+            }
+        }
     }
+    #!
+
+    do @context.end()
 }

@@ -41,8 +41,21 @@ module "model"
 
         data<"codigo">: new_code
 
-        exception
-        { }
+        exception{ do pop_exception() }
+    }
+
+    function setPrintTitles(&db,&data)
+    {
+        using data
+        {
+            member @"titles"
+            {
+                @"title": dbr.vars.getd(db,"FXCA108","")
+                @"subtitle": dbr.vars.getd(db,"FXCA109","")
+                @"subtitle_2": dbr.vars.getd(db,"FXCA110","")
+                @"footer": dbr.vars.getd(db,"FXCA111","")
+            }
+        }
     }
 
     function prodserv.crearProducto(&db, &params, &data)
@@ -304,6 +317,8 @@ module "model"
             @"list_clases*": dbr.list(db,"SELECT id, const FROM cclaseproducto WHERE id IN (3,4,5)",@null)
             @"list_lineas*": dbr.list(db,"SELECT sys_pk, codigo, descripcion FROM linea WHERE NOT IFNULL(sys_deleted,0) AND IF(@fil_clase>0, clase = @fil_clase, clase IN (3,4,5))",params)
         }
+        do setPrintTitles(db,data)
+        
         return data
 
 		exception

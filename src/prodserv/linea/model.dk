@@ -14,27 +14,48 @@ module "model"
 
         data<"codigo">: new_code
 
-        exception
-        { }
+        exception{ do pop_exception() }
+    }
+
+    function setPrintTitles(&db,&data)
+    {
+        using data
+        {
+            member @"titles"
+            {
+                @"title": dbr.vars.getd(db,"FXCA108","")
+                @"subtitle": dbr.vars.getd(db,"FXCA109","")
+                @"subtitle_2": dbr.vars.getd(db,"FXCA110","")
+                @"footer": dbr.vars.getd(db,"FXCA111","")
+            }
+        }
     }
 
     function list(&db, &params)
     {
-        //if not(dbr.security.isauth(db,@AUT_ACCESS_LINEA)) { do rise_error(500,"No autorizado") }
-			do dbr.apps.action.grant("CF20")
+		do dbr.apps.action.grant("CF20")
 
-        query="
-            SELECT sys_pk, clase, codigo, descripcion,
-                IFNULL(comision1,0) comision1, IFNULL(comision2,0) comision2, IFNULL(comision3,0) comision3,
-                IFNULL(comision4,0) comision4, IFNULL(comision5,0) comision5, IFNULL(notas,'') notas
-            FROM linea
-            WHERE IFNULL(sys_deleted,0) = 0
-                AND clase = 4
-                AND IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR descripcion LIKE CONCAT('%',@s,'%')))
-            ORDER BY codigo
-            LIMIT #<@default_max_rows>;"
-        return dbr.list(db, ftext(query), params)
-		exception
+        query = "
+        SELECT sys_pk, clase, codigo, descripcion,
+            IFNULL(comision1,0) comision1, IFNULL(comision2,0) comision2, IFNULL(comision3,0) comision3,
+            IFNULL(comision4,0) comision4, IFNULL(comision5,0) comision5, IFNULL(notas,'') notas
+        FROM linea
+        WHERE IFNULL(sys_deleted,0) = 0
+            AND clase = 4
+            AND IF(IFNULL(@s,'')='', true, (codigo LIKE CONCAT('%',@s,'%') OR descripcion LIKE CONCAT('%',@s,'%')))
+        ORDER BY codigo
+        LIMIT #<@default_max_rows>;
+        "
+
+        new data
+        {
+            @"data*": dbr.list(db,ftext(query),params)
+        }
+        do setPrintTitles(db,data)
+
+        return data
+		
+        exception
 		{
 			do errordet(@false)
 			do dbr.apps.action.log()
