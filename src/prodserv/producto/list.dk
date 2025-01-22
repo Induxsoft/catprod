@@ -55,6 +55,22 @@ module "Productos y Servicios"
         @"selected": @("#parameters/fil_linea")
     }
     // if @("#parameters/fil_clase") <= 0 { fil_linea<"attributes/disabled"> : @true }
+    new fil_marca
+    {
+        @"id": "fil_marca"
+        @"datatable*": ifnull(@("&./list_marcas"),list.create())
+        new member @"attributes"
+        {
+            @"class": "induxsoft-form-select"
+            @"name": "fil_marca"
+            @"onchange": "document.querySelector('#form_filter').submit()"
+        }
+        @"first_text": "(Todas las marcas)"
+        @"first_value": "-1"
+        @"text_field": "descripcion"
+        @"value_field": "sys_pk"
+        @"selected": @("#parameters/fil_marca")
+    }
 
     new table_definition
     {
@@ -149,6 +165,7 @@ module "Productos y Servicios"
                     {
                         div{#! do uie.dbSelect(fil_clase) } #$
                         div{#! do uie.dbSelect(fil_linea) } #$
+                        div{#! do uie.dbSelect(fil_marca) } #$
                     }
                     div(class="flex-grow-1")
                     {

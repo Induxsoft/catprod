@@ -659,7 +659,7 @@ module "form.dk"
                                 }
                             }
 
-                            h6(class="pt-4"){$"Lista de unidades"}
+                            h6(class="pt-4"){$"Lista de proveedores"}
                             div(class="row")
                             {
                                 div(class="col-sm-6")

@@ -275,9 +275,11 @@ module "model"
     function prodserv.list(&db, &params)
     {
 		do dbr.apps.action.grant("CF10")
-        if not(field.exist(params,"decimals")){ params<"decimals"> : parse.num(dbr.vars.get(db,"FXCA001")) }
+        
+        if not(field.exist(params,"decimals")) { params<"decimals"> : parse.num(dbr.vars.get(db,"FXCA001")) }
         if not(field.exist(params,"fil_clase")) { params<"fil_clase"> : -1 }
 		if not(field.exist(params,"fil_linea")) { params<"fil_linea"> : -1 }
+        if not(field.exist(params,"fil_marca")) { params<"fil_marca"> : -1 }
 
         query = "
         SELECT
@@ -308,6 +310,7 @@ module "model"
         if @@(params,"#fil_clase") > 0 { conditions = conditions + " AND p.iclase = @fil_clase" }
         else { conditions = conditions + " AND p.iclase IN (3,4,5)" }
         if @@(params,"#fil_linea") > 0 { conditions = conditions + " AND p.ilinea = @fil_linea" }
+        if @@(params,"#fil_marca") > 0 { conditions = conditions + " AND p.imarca = @fil_marca" }
         if trim(@@(params,"$s")) != "" { conditions = conditions + " AND (p.codigo = @s OR p.descripcion LIKE CONCAT('%',@s,'%'))" }
         
         if parse.bool(@@(params,"$only-prods")) { return dbr.list(db,ftext(query),params) }
@@ -316,6 +319,7 @@ module "model"
             @"data*": dbr.list(db,ftext(query),params)
             @"list_clases*": dbr.list(db,"SELECT id, const FROM cclaseproducto WHERE id IN (3,4,5)",@null)
             @"list_lineas*": dbr.list(db,"SELECT sys_pk, codigo, descripcion FROM linea WHERE NOT IFNULL(sys_deleted,0) AND IF(@fil_clase>0, clase = @fil_clase, clase IN (3,4,5))",params)
+            @"list_marcas*": dbr.list(db,"SELECT sys_pk, codigo, descripcion FROM marca WHERE NOT IFNULL(sys_deleted,0)",@null)
         }
         do setPrintTitles(db,data)
         
