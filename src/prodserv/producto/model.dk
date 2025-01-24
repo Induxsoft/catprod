@@ -287,12 +287,16 @@ module "model"
             p.codigo,
             p.descripcion,
             p.unidad,
+            IFNULL(p.costopromedio,0) costopromedio,
             IFNULL(p.costoultimo,0) costoultimo,
             IFNULL(p.existencia,0) existencia,
             IFNULL(p.saldo,0) saldo,
             IFNULL(m.descripcion,'') marca,
             REPLACE(SUBSTR(IFNULL(cc.const,''),2),'_',' ') clase,
+            d.sys_pk AS idivisa,
+            d.codigo AS cdivisa,
             d.descripcion divisa,
+            d.tcambio,
             l.descripcion linea
         FROM producto p
             LEFT JOIN marca m ON p.imarca = m.sys_pk
