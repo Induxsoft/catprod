@@ -280,6 +280,7 @@ module "model"
         if not(field.exist(params,"fil_clase")) { params<"fil_clase"> : -1 }
 		if not(field.exist(params,"fil_linea")) { params<"fil_linea"> : -1 }
         if not(field.exist(params,"fil_marca")) { params<"fil_marca"> : -1 }
+        fil_clases = trim(@@(params,"$fil_clases"))
 
         query = "
         SELECT
@@ -312,6 +313,7 @@ module "model"
         conditions = ""
 
         if @@(params,"#fil_clase") > 0 { conditions = conditions + " AND p.iclase = @fil_clase" }
+        else if fil_clases != "" { conditions = conditions + " AND p.iclase IN ("+fil_clases+")" }
         else { conditions = conditions + " AND p.iclase IN (3,4,5)" }
         if @@(params,"#fil_linea") > 0 { conditions = conditions + " AND p.ilinea = @fil_linea" }
         if @@(params,"#fil_marca") > 0 { conditions = conditions + " AND p.imarca = @fil_marca" }
