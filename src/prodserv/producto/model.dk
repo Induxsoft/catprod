@@ -60,8 +60,8 @@ module "model"
 
     function prodserv.crearProducto(&db, &params, &data)
     {
-     
         @table_name = "producto"
+
         if field.exist(data,"codbar1") && trim(@@(data,"$codbar1")) == "" { data<"codbar1*"> : @null }
         if field.exist(data,"codbar2") && trim(@@(data,"$codbar2")) == "" { data<"codbar2*"> : @null }
         if field.exist(data,"codbar3") && trim(@@(data,"$codbar3")) == "" { data<"codbar3*"> : @null }
@@ -162,7 +162,7 @@ module "model"
 	//Actualizar
 	function prodserv.actualizar(&db, &params, &data)
 	{
-	 @use_transaction = @false
+	    @use_transaction = @false
 		do dbr.apps.action.pre("CF12")
 		do dbr.begin(db)
 		ref res= prodserv.crearProducto(db,params,data)

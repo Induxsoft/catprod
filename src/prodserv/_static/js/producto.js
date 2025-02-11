@@ -180,6 +180,8 @@ var producto =
         Object.keys(data).forEach(k => {
             if (k.trim()!='') d[k]=data[k];
         });
+
+        d._ensamble = JSON.stringify(ensamble.filterData());
         
         InduxsoftCrudlModel.InvokeService(this.urlFormActn, d,
             success => { window.location.href = this.urlBack; },
