@@ -65,7 +65,6 @@ module "model"
         if field.exist(data,"codbar1") && trim(@@(data,"$codbar1")) == "" { data<"codbar1*"> : @null }
         if field.exist(data,"codbar2") && trim(@@(data,"$codbar2")) == "" { data<"codbar2*"> : @null }
         if field.exist(data,"codbar3") && trim(@@(data,"$codbar3")) == "" { data<"codbar3*"> : @null }
-        if @@(data,"#iclase") == 3 { data<"unidadb"> : @@(data,"$unidad") }
         if field.exist(data,"idepartamento") && trim(@@(data,"$idepartamento")) == "" { data<"idepartamento*">:@null }
         if field.exist(data,"imarca") && trim(@@(data,"$imarca")) == "" { data<"imarca*">:@null }
         if field.exist(data,"proveedor1") && trim(@@(data,"$proveedor1")) == "" { data<"proveedor1*">:@null }
@@ -79,7 +78,11 @@ module "model"
         do field.remove(data, "similar_group")
 
         if @@(data,"codigo")=="" { do check_autocode(db,"producto","codigo",data) }
-
+        if @@(data,"#iclase") == @clsServicio {
+            data<"unidadb"> : @@(data,"$unidad")
+            data<"itipo"> : 1
+            data<"metodovaluacion"> : 99
+        }
         if @@(data,"#iclase") != @clsEnsamble { do field.remove(data,"_ensamble") }
         else
         {

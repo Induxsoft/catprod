@@ -343,7 +343,9 @@ module "form.dk"
                                 {
                                     small(class="fw-bold"){$"Método de valuación:"}
                                     #!
-                                    do uie.dbSelect(lib.def_metodo_valuacion(metodval, @@(producto,'metodovaluacion')))
+                                    ref def_mval = lib.def_metodo_valuacion(metodval, @@(producto,'metodovaluacion'))
+                                    if isServicio { def_mval<"attributes/disabled">:"" }
+                                    do uie.dbSelect(def_mval)
                                     #$
                                 }
                                 div(class="col-sm-3")

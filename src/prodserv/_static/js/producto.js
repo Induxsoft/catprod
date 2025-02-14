@@ -252,12 +252,15 @@ var producto =
         }
 
         const select_tipo = document.querySelector('select[name="itipo"]');
+        const select_mval = document.querySelector('select[name="metodovaluacion"]');
         const elem_unidad = document.querySelectorAll('.elem-unidad');
         const genrl_check = document.querySelectorAll('.genrl-check');
 
         tab_ensamble.parentNode.classList.toggle('d-none',!show_tab_ensamble);
         select_tipo.value = (disable ? 1 : 2);
         select_tipo.toggleAttribute('disabled', disable);
+        select_mval.value = (disable ? 99 : 1);
+        select_mval.toggleAttribute('disabled', disable);
         elem_unidad.forEach(elem => elem.toggleAttribute('disabled', disable));
 
         genrl_check.forEach(check => {
