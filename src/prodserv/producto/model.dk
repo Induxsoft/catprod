@@ -208,7 +208,7 @@ module "model"
             ROUND(IFNULL(p.comision1,0),@decimals) comision1, ROUND(IFNULL(p.comision2,0),@decimals) comision2, ROUND(IFNULL(p.comision3,0),@decimals) comision3, ROUND(IFNULL(p.comision4,0),@decimals) comision4, ROUND(IFNULL(p.comision5,0),@decimals) comision5,
             IFNULL(p.visible,0) visible, IFNULL(p.uf_complemento,0) uf_complemento,
             IFNULL(p.flagutilidad,0) flagutilidad, IFNULL(p.flaglimites,0) flaglimites,
-            IFNULL(gp.sys_pk,'') similar_group
+            IFNULL(gp.sys_pk,'') similar_group,p.uf_codigoparaproveedor1,p.uf_codigoparaproveedor2,p.uf_codigoparaproveedor3
         FROM producto p
             LEFT JOIN grupoproductos_producto_ gp_p ON gp_p.iproductos = p.sys_pk
             LEFT JOIN grupoproductos gp ON gp.sys_pk = gp_p.igrupos
