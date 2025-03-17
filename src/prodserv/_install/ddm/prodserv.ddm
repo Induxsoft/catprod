@@ -40,7 +40,7 @@ model "productos y servicios"
     {
         @"codigo" string(15) unique required
         @"descripcion" string(50) unique required
-        @"notas" string(4096) 
+        @"notas" memo
     }
 	entity "proveedor" : "TableModel"
     {
@@ -53,7 +53,7 @@ model "productos y servicios"
         @"fax" string(50)
         @"limitecredito" decimal(18,8)
         @"nombre" string(150) unique required
-        @"notas" string(32000)
+        @"notas" memo
         @"rfc" string(15)
         @"saldo" decimal(18,8)
         @"tasaiva" ref:"ctasasiva" required
@@ -231,22 +231,22 @@ model "productos y servicios"
         @"comision4" decimal(18,8)
         @"comision5" decimal(18,8)
         @"descripcion" string(50) unique required
-        @"notas" string(4096)
+        @"notas" memo
         @"visible" bool
-        @"uf_indicaciones" string(4096)
+        @"uf_indicaciones" memo
         @"img_file" string(128)
     }
 
     entity "cfgimpuesto" : "TableModel"
     {
-        @"i1compra" string(4096)
-        @"i1venta" string(4096)
-        @"i2compra" string(4096)
-        @"i2venta" string(4096)
-        @"i3compra" string(4096)
-        @"i3venta" string(4096)
-        @"i4compra" string(4096)
-        @"i4venta" string(4096)
+        @"i1compra" string(128)
+        @"i1venta" string(128)
+        @"i2compra" string(128)
+        @"i2venta" string(128)
+        @"i3compra" string(128)
+        @"i3venta" string(128)
+        @"i4compra" string(128)
+        @"i4venta" string(128)
         @"nombre" string(25) unique required
         @"uf_tipoi1" string(25)
         @"uf_tipoi2" string(25)
@@ -264,7 +264,7 @@ model "productos y servicios"
         @"comision4" decimal(18,8)
         @"comision5" decimal(18,8)
         @"nombre" string(25) unique required
-        @"notas" string(4096)
+        @"notas" memo
         @"tasa_iva" decimal(18,8)
     }
     
@@ -293,7 +293,7 @@ model "productos y servicios"
         @"app_id" string(32) key
         @"app_title" string(255)
         @"created" datetime required
-        @"app_info" mmemo
+        @"app_info" memo
     }
     // Categoria de la aplicación
     entity "sys_app_category"
