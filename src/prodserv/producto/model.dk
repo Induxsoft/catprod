@@ -286,7 +286,7 @@ module "model"
         fil_clases = trim(@@(params,"$fil_clases"))
 
         query = "
-        SELECT
+        SELECT distinct
             p.sys_pk,
             p.codigo,
             p.descripcion,
@@ -311,6 +311,7 @@ module "model"
             INNER JOIN cclaseproducto cc ON p.iclase = cc.id
             INNER JOIN divisa d ON p.idivisa = d.sys_pk
             INNER JOIN linea l ON p.ilinea = l.sys_pk
+            LEFT JOIN existencias e ON p.sys_pk=e.fk_producto_iexistencias
         WHERE NOT IFNULL(p.sys_deleted,0)
             #<conditions>
         ORDER BY p.codigo
@@ -322,11 +323,15 @@ module "model"
         if @@(params,"#fil_clase") > 0 { conditions = conditions + " AND p.iclase = @fil_clase" }
         else if fil_clases != "" { conditions = conditions + " AND p.iclase IN ("+fil_clases+")" }
         else { conditions = conditions + " AND p.iclase IN (3,4,5)" }
+
+        if @@(params,"#fil_exitencia") { conditions = conditions + " AND IFNULL(p.existencia,0)>0 " }
         if @@(params,"#fil_linea") > 0 { conditions = conditions + " AND p.ilinea = @fil_linea" }
+        if @@(params,"#fil_almacen") > 0 { conditions = conditions + " AND e.ialmacen = @fil_almacen" }
         if @@(params,"#fil_marca") > 0 { conditions = conditions + " AND p.imarca = @fil_marca" }
         if trim(@@(params,"$s")) != "" { conditions = conditions + " AND (p.codigo = @s OR p.descripcion LIKE CONCAT('%',@s,'%'))" }
         
         if parse.bool(@@(params,"$only-prods")) { return dbr.list(db,ftext(query),params) }
+
         new data
         {
             @"data*": dbr.list(db,ftext(query),params)
