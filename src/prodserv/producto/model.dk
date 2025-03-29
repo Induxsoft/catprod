@@ -295,6 +295,11 @@ module "model"
             ifnull(p.unidadc,'')unidadc,
             ifnull(p.unidadd,'')unidadd,
             ifnull(p.unidade,'')unidade,
+
+            IFNULL(P.factorb,0)factorb,
+            IFNULL(P.factorc,0)factorc,
+            IFNULL(P.factord,0)factord,
+            IFNULL(P.factore,0)factore,
             IFNULL(p.costopromedio,0) costopromedio,
             IFNULL(p.costoultimo,0) costoultimo,
             IFNULL(p.existencia,0) existencia,
