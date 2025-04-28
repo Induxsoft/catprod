@@ -3,7 +3,7 @@ var producto =
     urlFormActn:'', urlBack:'', formcomi:[],
     urlMasPrecios:'', exist_mp_app: false,
     currentProducto: '', curr_url:'',
-    iclase_selected: 4, ff:null, decimals:2, m_calc_desc:2,
+    iclase_selected:4, itipo_selected:1, ff:null, decimals:2, m_calc_desc:2,
     tbl_ensamble:null, arr_ensamble:[],
 
     init()
@@ -28,6 +28,7 @@ var producto =
         const ipt_unidadb = document.querySelector('input[name="unidadb"]');
         const msg_factor = document.querySelector('#mesage_factor');
         const select_clase = document.querySelector('select[name="iclase"]');
+        const select_tipo = document.querySelector('select[name="itipo"]');
         const formacomision = document.querySelector('select[name="formacomision"]');
         const tipocomision = document.querySelector('select[name="tipocomision"]');
         const ipt_utilmin = document.querySelector('input[name="utilmin"]');
@@ -54,6 +55,7 @@ var producto =
             });
         }
         if (select_clase) select_clase.addEventListener('change', e => this.select_class_changed(select_clase));
+        if (select_tipo) select_tipo.addEventListener('change', e => this.select_itipo_changed(select_tipo));
         if (formacomision) formacomision.addEventListener('change', e => this.change_comision_field(formacomision));
         if (tipocomision) tipocomision.addEventListener('change', e => this.select_comision_type(tipocomision));
         if (ipt_utilmin && ipt_costoultimo) ipt_utilmin.addEventListener('keyup', e => this.calcule_utilidad(ipt_utilmin, ipt_costoultimo));
@@ -263,6 +265,23 @@ var producto =
         select_mval.toggleAttribute('disabled', disable);
         elem_unidad.forEach(elem => elem.toggleAttribute('disabled', disable));
 
+        genrl_check.forEach(check => {
+            check.checked = false;
+            this.set_ipt_check_value(document.querySelector('#ipt_reqserie'), check);
+            this.set_ipt_check_value(document.querySelector('#ipt_reqlote'), check);
+            check.toggleAttribute('disabled', disable);
+        });
+    },
+    select_itipo_changed(selectTipo)
+    {
+        const select_mval = document.querySelector('select[name="metodovaluacion"]');
+        const genrl_check = document.querySelectorAll('.genrl-check');
+        
+        this.itipo_selected = Number(selectTipo.value);
+        let disable = (this.itipo_selected == 1);
+
+        select_mval.value = (disable ? 99 : 1);
+        select_mval.toggleAttribute('disabled', disable);
         genrl_check.forEach(check => {
             check.checked = false;
             this.set_ipt_check_value(document.querySelector('#ipt_reqserie'), check);

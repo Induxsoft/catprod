@@ -46,7 +46,8 @@ module "form.dk"
 
     exists_mp = dir.exists(@PRODSERV_MAS_PRECIOS_PATH)
     isEnsamble = (@@(producto,"#iclase") == @clsEnsamble)
-    isServicio = (@@(producto,'#iclase') == @clsServicio)
+    isServicio = (@@(producto,"#iclase") == @clsServicio)
+    noInventariable = (@@(producto,"#itipo") == 1)
     cMateriales = getTotal(ensamble,"importe")
     sinComi = (@@(producto,'#tipocomision') == 0)
     comiXPrice = (@@(producto,'#formacomision') == 2)
@@ -235,13 +236,13 @@ module "form.dk"
                             {
                                 div(class="form-check")
                                 {
-                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true" "#<ifstr(isServicio,'disabled','')>"="")
+                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_ns" "#<ifstr(@@(producto,'#reqserie')==1,'checked','')>"="true" "#<ifstr(isServicio || noInventariable,'disabled','')>"="")
                                     label(class="form-check-label" "for"="check_req_ns"){$"Requiere manejar número de serie"}
                                     input(type="hidden" name="reqserie" id="ipt_reqserie" value="#<@@(producto,'#reqserie')>" required="true")
                                 }
                                 div(class="form-check")
                                 {
-                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true" "#<ifstr(isServicio,'disabled','')>"="")
+                                    input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_req_lt" "#<ifstr(@@(producto,'#reqlote')==1,'checked','')>"="true" "#<ifstr(isServicio || noInventariable,'disabled','')>"="")
                                     label(class="form-check-label" "for"="check_req_lt"){$"Requiere manejar lotes"}
                                     input(type="hidden" name="reqlote" id="ipt_reqlote" value="#<@@(producto,'#reqlote')>" required="true")
                                 }
@@ -344,7 +345,7 @@ module "form.dk"
                                     small(class="fw-bold"){$"Método de valuación:"}
                                     #!
                                     ref def_mval = lib.def_metodo_valuacion(metodval, @@(producto,'metodovaluacion'))
-                                    if isServicio { def_mval<"attributes/disabled">:"" }
+                                    if isServicio || noInventariable { def_mval<"attributes/disabled">:"" }
                                     do uie.dbSelect(def_mval)
                                     #$
                                 }

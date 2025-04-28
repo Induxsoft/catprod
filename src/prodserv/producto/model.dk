@@ -80,8 +80,12 @@ module "model"
         if @@(data,"codigo")=="" { do check_autocode(db,"producto","codigo",data) }
         if @@(data,"#iclase") == @clsServicio {
             data<"unidadb"> : @@(data,"$unidad")
-            data<"itipo"> : 1
-            data<"metodovaluacion"> : 99
+            data<"itipo"> : 1 //No Inventariable
+        }
+        if @@(data,"#itipo") == 1 {
+            data<"metodovaluacion"> : 99 //Ninguno
+            data<"reqserie"> : @false
+            data<"reqlote"> : @false
         }
         if @@(data,"#iclase") != @clsEnsamble { do field.remove(data,"_ensamble") }
         else
