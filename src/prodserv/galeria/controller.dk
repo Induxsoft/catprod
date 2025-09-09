@@ -5,7 +5,6 @@ module "index"
 	#include "functions.dkh"
 	#include "serialize.dkh"
 	#include "dbr.dkh"
-	#include "magick.dkh"
 	#include "linux-fixes.dkh"
 
 	//@SITE_INCLUDES="config.dk,lib.dk,magick.lib.dk"

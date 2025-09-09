@@ -3,9 +3,13 @@
 module "model"
 {
     #include "webcl.dkh"
-
+    
+    #include "prodserv/lib.dk"
     #include "../config.dk"
     #include "../_lib/lib.dk"
+    #include "prodserv/galeria/model.dk"
+    #include "prodserv/galeria/lib.dk"
+    #include "prodserv/galeria/config.dk"
 
     @table_name = "producto"
 
@@ -446,17 +450,21 @@ module "model"
     function prodserv.obtenerGaleria(&db, &params)
     {
         ref product = dbr.rec(db, "SELECT descripcion, REPLACE(TRIM(codigo),' ','-') codigo FROM producto WHERE sys_pk=@_entity_id", params)
-
+        ref @cross_domain=@null
         sku = ""
         if isnull(product) { do rise_error(0, "El producto no existe") }
-        sku = @@(product, "$codigo")
+        sku = tolower(@@(product, "$codigo"))
 
-        endpoint = @URL_IMAGES
-        endpoint = replace(endpoint, "@sku", sku)
-        endpoint = add_host_to_url(endpoint)
+        sku >> params
         
-        response = http.request(endpoint, "GET", @null, '')
-        ref data = from.json(response)
+        // endpoint = @URL_IMAGES
+        // endpoint = replace(endpoint, "@sku", sku)
+        // endpoint = add_host_to_url(endpoint)
+
+        // response = http.request(trim(endpoint), "GET",@null, '')
+        
+        // ref data = from.json(response)
+        ref data = gallery.magick.get(db,params)
 
         new res
         {

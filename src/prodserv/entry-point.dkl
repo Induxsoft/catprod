@@ -11,6 +11,7 @@ module "Controller configs"
 	#include "dbr.security.dkl"
 	#include "dbr.events.dkl"
 	#include "crudl/crudl.dk"
+	#include "magick.dkh"
 
 	@base_path="prodserv"
 	@path_root="" // Establezca una ruta de ser necesario

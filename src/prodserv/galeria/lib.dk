@@ -296,7 +296,7 @@ module "lib.dk"
         // path= path.concat(@PATH_STATIC_CONTENT,storeDBName(storeid))
         // return path.concat(path,sku)
         do dir.ensure(@PATH_STATIC_CONTENT)
-        return @PATH_STATIC_CONTENT
+        return tolower(replace_paths(@PATH_STATIC_CONTENT))
     }
     #!
     agregarImagenAlSKU :: storeId, sku, guid
@@ -333,7 +333,7 @@ module "lib.dk"
     replace_paths::path
     {
         ref get = @@(@http_context, "&request/get")
-        ref hed = @@(@http_context, "&request/headers/")
+        ref hed = @@(@http_context, "&request/headers")
         
         if isset("@cross_domain") && not(isnull(@cross_domain))
         {

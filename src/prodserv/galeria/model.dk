@@ -1,20 +1,19 @@
 #include "dkli.dkh"
 #!
-module "magick.lib.dk"
+module ":gallery"
 {
-    
 	#!
     create_json::&data,storeid,idimg
     {
         new json
         {
             @"id":file.justname(@@(data,"id"))
-            @"src":genUrlImg(storeid,@@(data,"$sku"),idimg)
+            @"src":replace_paths(genUrlImg(storeid,@@(data,"$sku"),idimg))
             @"tags*":list.create()
             @"title":@@(data,"$title")
             @"text":ifstr(@@(data,"$text")=="",@@(data,"$descripcion"),@@(data,"$text"))
         }
-
+        
         do include_metadatos(storeid,@@(data,"$sku"),@@(json,"$id"),json)
 
         return json
@@ -58,7 +57,7 @@ module "magick.lib.dk"
                 new data{}
                 if getDimensionImage(data,file)
                 {
-                    data<"src">:genUrlImg(@@(params,"$storeid"),@@(params,"$sku"),file.name(file))
+                    data<"src">:replace_paths(genUrlImg(@@(params,"$storeid"),@@(params,"$sku"),file.name(file)))
                     do list.add(variations,data)
                 }
             }
@@ -91,7 +90,7 @@ module "magick.lib.dk"
         pathfile=pathSku(@@(params,"$storeid"),@@(params,"$sku"))
 
         ref lfiles=list.create()
-
+        
         if not(dir.exists(pathfile)){return lfiles}
         
         ref filesbd=filesbd(params)
@@ -110,9 +109,10 @@ module "magick.lib.dk"
                     @"descripcion":@@(producto,"$Descripcion")
                 }
                 ref json=create_json(data,@@(params,"$storeid"),@@(f,"$guidimagen"))
+                
                 do getDimensionImage(json,file)                
+                
                 json<"variations*">:create_variations(pathfile,@@(data,"$id"),params)
-
                 do list.add(lfiles,json)
             }
         }
@@ -284,7 +284,7 @@ module "magick.lib.dk"
         pathfile=pathSku(storeid,sku)
         pathfile=path.concat(pathfile,id+".json")
         if not(file.exists(pathfile)){return}
-
+    
         ref datafile=from.json(file.rtext(pathfile))
         do create_new_record_from_data(datafile,data)
     }
@@ -325,8 +325,8 @@ module "magick.lib.dk"
     // point @patch to magick.patch
     // point @delete to magick.delete
 
-    point @read to magick.get
-    point @create to magick.post
-    point @update to magick.patch
-    point @delete to magick.delete
+    point @read to      gallery.magick.get
+    point @create to    gallery.magick.post
+    point @update to    gallery.magick.patch
+    point @delete to    gallery.magick.delete
 }
