@@ -206,6 +206,11 @@ program "importar.producto.dkl"
                 isNew = @false
 
                 pCodigo, pCodbar1, pCodbar2, pCodbar3 >> params2
+
+                if trim(pCodbar1)==""{do field.remove(params2,"pCodbar1")}
+                if trim(pCodbar2)==""{do field.remove(params2,"pCodbar2")}
+                if trim(pCodbar3)==""{do field.remove(params2,"pCodbar3")}
+
                 ref producto = dbr.rec(db,"SELECT "+sys_fields+" FROM producto WHERE codigo=@pCodigo OR codbar1=@pCodbar1 OR codbar2=@pCodbar2 OR codbar3=@pCodbar3",params2)
                 if isnull(producto)
                 {
@@ -272,6 +277,10 @@ program "importar.producto.dkl"
                     @"uf_sat_proser": uf_sat_proser
                     @"uf_sat_uniproser": uf_sat_uniproser
                 }
+                if trim(pCodbar1)==""{do field.remove(producto,"codbar1")}
+                if trim(pCodbar2)==""{do field.remove(producto,"codbar2")}
+                if trim(pCodbar3)==""{do field.remove(producto,"codbar3")}
+
                 ref producto:record.copyexin(fk_fields,producto,"*",",","",":")
                 
                 if isNew { do dbr.insert(db,"producto",producto) }
