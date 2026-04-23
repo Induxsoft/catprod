@@ -85,7 +85,7 @@ program "importar.producto.dkl"
 
         sys_fields = "sys_pk,sys_guid,sys_dtcreated,sys_timestamp,sys_info,sys_user,sys_lastuser,sys_exported,sys_dtexported,sys_recver,sys_deleted,sys_lock"
 
-        imp_fields = "codigo,descripcion,unidad,clase,tipo,valuacion,linea,divisa,impuestos,costo,precio1,precio2,precio3,precio4,precio5,marca,departamento,formacomision,tipocomision,proveedor1,proveedor2,proveedor3,codbarras1,codbarras2,codbarras3,reqlote,reqserie,uf_sat_proser,uf_sat_uniproser"
+        imp_fields = "cproduccion,codigo,descripcion,unidad,clase,tipo,valuacion,linea,divisa,impuestos,costo,precio1,precio2,precio3,precio4,precio5,marca,departamento,formacomision,tipocomision,proveedor1,proveedor2,proveedor3,codbarras1,codbarras2,codbarras3,reqlote,reqserie,uf_sat_proser,uf_sat_uniproser"
 
         contador = 0
         progreso = 0
@@ -239,6 +239,9 @@ program "importar.producto.dkl"
                     isNew = @true
                 }
                 params2<"sys_pk"> : @@(producto,"#sys_pk")
+                
+                if not(field.exist(itm,"visible")){itm<"visible">:@true}
+
                 using producto
                 {
                     // @"adicional": parse.bool(trim(@@(itm,"$adicional")))
@@ -261,7 +264,7 @@ program "importar.producto.dkl"
                     @"reqlote": parse.bool(trim(@@(itm,"$reqlote")))
                     @"reqserie": parse.bool(trim(@@(itm,"$reqserie")))
                     // @"vinculardata": parse.bool(trim(@@(itm,"$vinculardata")))
-                    // @"visible": parse.bool(trim(@@(itm,"$visible")))
+                    @"visible": parse.bool(trim(@@(itm,"$visible")))
                     @"unidad": pUnidad
                     @"unidadb": pUnidadb
                     @"unidadc": pUnidadc
@@ -283,8 +286,27 @@ program "importar.producto.dkl"
 
                 ref producto:record.copyexin(fk_fields,producto,"*",",","",":")
                 
-                if isNew { do dbr.insert(db,"producto",producto) }
+                if isNew 
+                { 
+                    do dbr.insert(db,"producto",producto) 
+                    params2<"sys_pk">:dbr.num(db,"SELECT sys_pk from producto where sys_guid=@sys_guid",producto)
+                }
                 else { do dbr.update(db,"producto",producto,"sys_pk=@sys_pk",params2) }
+
+                if field.exist(itm,"cproduccion")
+                {
+                    new cproduccion_producto_
+                    {
+                        @"sys_timestamp*":dbr.sql("now()")
+                        @"sys_recver":0
+                        @"iproductos":@@(params2,"#sys_pk")
+                        @"icentrosproduccion":dbr.num(db,"SELECT sys_pk FROM cproduccion c WHERE c.codigo=@cproduccion OR c.descripcion=@cproduccion;",itm)
+                    }
+                    if dbr.num(db,"SELECT IFNULL(sys_pk,0) FROM cproduccion_producto_ WHERE iproductos=@iproductos AND icentrosproduccion=@icentrosproduccion",cproduccion_producto_) < 1
+                    {
+                        do dbr.insert(db,"cproduccion_producto_",cproduccion_producto_)
+                    }
+                }
             }
 
             contador = contador + 1
