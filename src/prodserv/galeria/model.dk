@@ -88,20 +88,18 @@ module ":gallery"
     	if isnull(producto){do rise_error(500,"SKU no encontrado")}
 
         pathfile=pathSku(@@(params,"$storeid"),@@(params,"$sku"))
-
         ref lfiles=list.create()
-        
-        if not(dir.exists(pathfile)){return lfiles}
-        
+        params<"sku">:tolower(@@(params,"$sku"))
+        // if not(dir.exists(pathfile)){return lfiles}
         ref filesbd=filesbd(params)
-        
+        @STATIC_CONTENT_URL=tolower(@STATIC_CONTENT_URL)
         for i=0;i<@count(filesbd)
         {
             ref f=@item(filesbd,i)
             file=path.concat(pathfile,@@(f,"$guidimagen"))
-            
             if file.exists(file)
             {
+                f<"sku">:@@(params,"$sku")
                 new data
                 {
                     @"id":file.name(@@(f,"$guidimagen"))
@@ -116,6 +114,7 @@ module ":gallery"
                 do list.add(lfiles,json)
             }
         }
+        // do rise_error(0,to.json(lfiles))
     	return lfiles
     }
     magick.post::&db,&params,&data
@@ -124,24 +123,23 @@ module ":gallery"
         ref rmetadatos=record.copy(data,"*")
 
         //do storeExistOrError(@@(params,"$storeid"))
-
+        
         if @@(data,"$id")==""{data<"id">:uuid()}
         pathfile=pathSku(@@(params,"$storeid"),@@(params,"$sku"))
 
         ref producto=getProductoBySKU(db,@@(params,"$sku"))
         if isnull(producto){do rise_error(500,"SKU no encontrado")}
-
+        
         data<"sku">:@@(params,"sku")
         data<"descripcion">:@@(producto,"$Descripcion")
 
         do dir.ensure(pathfile)
-
+        
         ref files=@@(@http_context,"&request/files")
 
         ref json=record.create()
 
-
-        for i=0;i<@count(files) //&& i<1
+        for i=0;i<@count(files)
         {
             if i>0{data<"id">:uuid()} // id automático para varias imágenes
 
@@ -162,7 +160,7 @@ module ":gallery"
 
         json<"variations*">:create_variations(pathfile,@@(data,"$id"),params)
         do save_metadatos(@@(params,"$storeid"),@@(params,"$sku"),@@(data,"$id"),rmetadatos)
-
+        
         return json
 
     }
@@ -189,7 +187,7 @@ module ":gallery"
         pathfile=pathSku(@@(params,"$storeid"),@@(params,"$sku"))
 
         ref filebd=filebd(params)
-
+        
         file=path.concat(pathfile,@@(filebd,"$guidimagen"))
         do getDimensionImage(json,file)
         json<"variations*">:create_variations(pathfile,@@(data,"$id"),params)
