@@ -198,7 +198,7 @@ module "model"
 
         sql_producto = "
         SELECT 
-            p.sys_pk, p.sys_recver, p.codigo, p.descripcion, p.iclase, p.itipo, p.unidad, ROUND(IFNULL(p.costoultimo,0),@decimals) costoultimo,
+            p.sys_pk, p.sys_recver,p.sys_info, p.codigo, p.descripcion, p.iclase, p.itipo, p.unidad, ROUND(IFNULL(p.costoultimo,0),@decimals) costoultimo,
             IFNULL(p.idivisa,'') idivisa, IFNULL(p.ilinea,'') ilinea, IFNULL(p.idepartamento,'') idepartamento, IFNULL(p.imarca,'') imarca,
             IFNULL(p.proveedor1,'') proveedor1, IFNULL(p.proveedor2,'') proveedor2, IFNULL(p.proveedor3,'') proveedor3,
             IFNULL(p.factorb,1) factorb, IFNULL(p.unidadb,'') unidadb,

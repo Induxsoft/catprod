@@ -698,6 +698,12 @@ module "form.dk"
                             }
                             div(class="form-check")
                             {
+                                input(class="form-check-input induxsoft-corners genrl-check" type="checkbox" id="check_sys_info" "#<ifstr(@@(producto,'$sys_info')=='HIDDEN','checked','')>"="true" onchange="document.getElementById('sys_info').value = !this.checked ? '' : 'HIDDEN'")
+                                label(class="form-check-label" "for"="check_sys_info"){$"Visible en E-commerce"}
+                                input(type="hidden" name="sys_info" id="sys_info" value="#<@@(producto,'$sys_info')>")
+                            }
+                            div(class="form-check")
+                            {
                                 input(class="form-check-input induxsoft-corners" type="checkbox" id="check_compl_concepto" "#<ifstr(@@(producto,'#uf_complemento')==1,'checked','')>"="true")
                                 label(class="form-check-label" "for"="check_compl_concepto"){$"Incluir complemento concepto en Comprobante Fiscal Digital"}
                                 input(type="hidden" name="uf_complemento" id="ipt_complemento" value="#<@@(producto,'#uf_complemento')>")
