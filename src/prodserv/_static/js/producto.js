@@ -266,10 +266,10 @@ var producto =
         elem_unidad.forEach(elem => elem.toggleAttribute('disabled', disable));
 
         genrl_check.forEach(check => {
-            check.checked = false;
+            if(check.id!="check_sys_info")check.checked = false;
             this.set_ipt_check_value(document.querySelector('#ipt_reqserie'), check);
             this.set_ipt_check_value(document.querySelector('#ipt_reqlote'), check);
-            check.toggleAttribute('disabled', disable);
+            if(check.id!="check_sys_info")check.toggleAttribute('disabled', disable);
         });
     },
     select_itipo_changed(selectTipo)
