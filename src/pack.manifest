@@ -1,6 +1,6 @@
 {
 	"id":"prodserv",
 	"installable":["prodserv"],
-	"version":"1.0.85",
+	"version":"1.0.86",
 	"schema_ver":"1.0.10"
 }
