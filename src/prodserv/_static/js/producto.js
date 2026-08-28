@@ -19,6 +19,8 @@ var producto =
         const check_flagl = document.querySelector('#check_flaglimites');
         const ipt_flagutl = document.querySelector('#ipt_flagutilidad');
         const ipt_flaglim = document.querySelector('#ipt_flaglimites');
+        const chk_solcant = document.querySelector('#uf_solicitarcantidad');
+        const ipt_solcant = document.querySelector('input[name="uf_solicitarcantidad"]');
         const check_viewp = document.querySelector('#check_view_pv');
         const check_compc = document.querySelector('#check_compl_concepto');
         const ipt_visible = document.querySelector('#ipt_visible');
@@ -43,6 +45,7 @@ var producto =
         if (check_req_l && ipt_reqlote) check_req_l.addEventListener('change', e => { this.set_ipt_check_value(ipt_reqlote, check_req_l) });
         if (check_flagu && ipt_flagutl) check_flagu.addEventListener('change', e => { this.set_ipt_check_value(ipt_flagutl, check_flagu) });
         if (check_flagl && ipt_flaglim) check_flagl.addEventListener('change', e => { this.set_ipt_check_value(ipt_flaglim, check_flagl) });
+        if (chk_solcant && ipt_solcant) chk_solcant.addEventListener('change', e => { this.set_ipt_check_value(ipt_solcant, chk_solcant) });
         if (check_viewp && ipt_visible) check_viewp.addEventListener('change', e => { this.set_ipt_check_value(ipt_visible, check_viewp) });
         if (check_compc && ipt_complem) check_compc.addEventListener('change', e => { this.set_ipt_check_value(ipt_complem, check_compc) });
 

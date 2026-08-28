@@ -688,6 +688,12 @@ module "form.dk"
                                     input(type="text" class="induxsoft-form-control mb-2" name="uf_codigoparaproveedor3" value="#<@@(producto,'$uf_codigoparaproveedor3')>")
                                 }
                             }
+                            div(class="form-check")
+                            {
+                                input(class="form-check-input induxsoft-corners" type="checkbox" id="uf_solicitarcantidad" "#<ifstr(@@(producto,'#uf_solicitarcantidad')==1,'checked','')>"="true")
+                                label(class="form-check-label" "for"="uf_solicitarcantidad"){"Solicitar cantidad al vender en el POS"}
+                                input(type="hidden" name="uf_solicitarcantidad" value="#<@@(producto,'#uf_solicitarcantidad')>")
+                            }
 
                             h6(class="pt-4"){$"Información adicional"}
                             div(class="form-check")
