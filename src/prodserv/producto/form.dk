@@ -62,7 +62,7 @@ module "form.dk"
     point general_act to header_act
     new nav_config
     {
-        @"title": ifstr(@isNewEnt,'Agregar','Editar') + ' producto o servicio'
+        @"title": ifstr(@isNewEnt,'Agregar','Editar') + ' producto o servicio'+ifstr(@isNewEnt,'',"<br><small style='color: lightslategray;font-size: smaller;'>"+@@(producto,'$descripcion')+"</small>")
         @"buttons*": general_act
         @"urlexit": @PRODSERV_PRODUCTO
         member @"hidden"
