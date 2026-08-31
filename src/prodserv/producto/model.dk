@@ -318,12 +318,19 @@ module "model"
             d.codigo AS cdivisa,
             d.descripcion divisa,
             d.tcambio,
-            l.descripcion linea
+            l.descripcion linea,
+            p.precio1,
+            p.precio2,
+            p.precio3,
+            p.precio4,
+            p.precio5,
+            i.nombre as impuesto
         FROM producto p
             LEFT JOIN marca m ON p.imarca = m.sys_pk
             INNER JOIN cclaseproducto cc ON p.iclase = cc.id
             INNER JOIN divisa d ON p.idivisa = d.sys_pk
             INNER JOIN linea l ON p.ilinea = l.sys_pk
+            INNER JOIN cfgimpuesto i ON p.impuestos=i.sys_pk
             LEFT JOIN existencias e ON p.sys_pk=e.fk_producto_iexistencias
         WHERE NOT IFNULL(p.sys_deleted,0)
             #<conditions>

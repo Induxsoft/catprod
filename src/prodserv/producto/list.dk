@@ -113,6 +113,51 @@ module "Productos y Servicios"
                 @"thousandssep": @true
                 @"decs": @("#parameters/decimals")
             }
+            member @"precio1"
+            {
+                @"caption":"Precio1"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": @("#parameters/decimals")
+            }
+            member @"precio2"
+            {
+                @"caption":"Precio2"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": @("#parameters/decimals")
+            }
+            member @"precio3"
+            {
+                @"caption":"Precio3"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": @("#parameters/decimals")
+            }
+            member @"precio4"
+            {
+                @"caption":"Precio4"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": @("#parameters/decimals")
+            }
+            member @"precio5"
+            {
+                @"caption":"Precio5"
+                @"align": "end"
+                @"format": @true
+                @"thousandssep": @true
+                @"decs": @("#parameters/decimals")
+            }
+            member @"impuesto"
+            {
+                @"caption":"Impuesto"
+                @"align": "center"
+            }
             member @"clase"
             {
                 @"caption":"Clase"
