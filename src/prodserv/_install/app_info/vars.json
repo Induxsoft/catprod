@@ -96,5 +96,42 @@
                 }
             }
         ]
+    },
+    {
+        "id": "prodserv.views",
+        "parent":"prodserv",
+        "caption": "Interfaces / Vistas",
+        "help": "Ajustar el diseño de las vistas",
+        "vars": [
+            {
+                "varname": "prodserv.producto.max_rows",
+                "vardefault": "250",
+                "varvalue": "250",
+                "varcaption": "Mostrar los primeros N productos",
+                "varhelp": "Máximo de filas a mostrar en: \"Productos y servicios\"",
+                "vartype": "int",
+                "varinput": { "control": "number" }
+            },
+            {
+                "varname": "prodserv.producto.pagination",
+                "vardefault": "0",
+                "varvalue": "0",
+                "varcaption": "Paginar lista de productos",
+                "varhelp": "Habilita la paginación en: \"Productos y servicios\"",
+                "vartype": "bool",
+                "varinput": {
+                    "control": "select",
+                    "source":{
+                        "type":"list",
+                        "values":[
+                            {"val":"1", "text":"Sí"},
+                            {"val":"0", "text":"No"}
+                        ],
+                        "showfield":"text",
+                        "keyfield":"val"
+                    }
+                }
+            }
+        ]
     }
 ]

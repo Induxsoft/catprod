@@ -335,8 +335,13 @@ module "model"
         WHERE NOT IFNULL(p.sys_deleted,0)
             #<conditions>
         ORDER BY p.codigo
-        LIMIT #<@default_max_rows>;
         "
+
+        max_rows = trun(parse.num(dbr.vars.get(db,"prodserv.producto.max_rows")))
+        pagination = parse.bool(dbr.vars.get(db,"prodserv.producto.pagination"))
+
+        if max_rows < 1 { max_rows = @default_max_rows }
+        if not(pagination) { query = query + ftext(" LIMIT #<max_rows>;") }
 
         conditions = ""
 
@@ -354,6 +359,8 @@ module "model"
 
         new data
         {
+            @"max_rows": max_rows
+            @"pagination": pagination
             @"data*": dbr.list(db,ftext(query),params)
             @"list_clases*": dbr.list(db,"SELECT id, const FROM cclaseproducto WHERE id IN (3,4,5)",@null)
             @"list_lineas*": dbr.list(db,"SELECT sys_pk, codigo, descripcion FROM linea WHERE NOT IFNULL(sys_deleted,0) AND IF(@fil_clase>0, clase = @fil_clase, clase IN (3,4,5))",params)

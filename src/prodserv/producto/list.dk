@@ -75,7 +75,11 @@ module "Productos y Servicios"
     new table_definition
     {
         @"datatable*": productos
+        @"pagination": @("#./pagination")
+        @"rows_per_page": @("#./max_rows")
+        @"tableheight": ifstr(@("#./pagination"), "70vh", "75vh")
         @"table_footer": "Mostrando los primeros # productos ordenados por código"
+
         member @"columns"
         {
             member @"codigo" { @"caption":"Código" }
