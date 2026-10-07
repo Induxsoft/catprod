@@ -105,8 +105,8 @@
         "vars": [
             {
                 "varname": "prodserv.producto.max_rows",
-                "vardefault": "250",
-                "varvalue": "250",
+                "vardefault": "500",
+                "varvalue": "500",
                 "varcaption": "Mostrar los primeros N productos",
                 "varhelp": "Máximo de filas a mostrar en: \"Productos y servicios\"",
                 "vartype": "int",
